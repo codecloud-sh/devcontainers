@@ -9,6 +9,8 @@ services:
 
     volumes:
     - ..:/workspaces/{{ project_slug }}:cached
+    # Ruby, Node et gems installés par mise : gardés d'une reconstruction à l'autre
+    - mise-data:/home/{{ username }}/.local/share/mise
 
     # Garde le conteneur en vie quand aucun processus ne tourne
     command: sleep infinity
@@ -63,9 +65,9 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: "true"
       MYSQL_ROOT_HOST: "%"
 {%- endif %}
-{%- if redis or database != "sqlite3" %}
 
 volumes:
+  mise-data:
 {%- if redis %}
   redis-data:
 {%- endif %}
@@ -73,5 +75,4 @@ volumes:
   postgres-data:
 {%- elif database == "mysql" %}
   mysql-data:
-{%- endif %}
 {%- endif %}

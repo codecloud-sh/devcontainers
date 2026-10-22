@@ -3,35 +3,33 @@ ARG USERNAME={{ username }}
 ARG USER_GID=1000
 ARG USER_UID=1000
 
-# Create the user
-RUN groupadd --gid $USER_GID $USERNAME \
-  && apt-get update \
-  && apt-get install -y sudo zsh curl \
-  && useradd --uid $USER_UID --gid $USER_GID -m  -s /bin/zsh $USERNAME \
-  # Add sudo support
-  && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
-  && chmod 0440 /etc/sudoers.d/$USERNAME \
+# System packages
+# - sudo, zsh, curl, ca-certificates, jq: user environment and dotfiles
+#   (ca-certificates is only a recommendation of curl, skipped by --no-install-recommends)
+# - git, openssh-client: Git
+# - build-essential, libffi-dev (fiddle), libyaml-dev (psych), zlib1g-dev (zlib):
+#   native gem extensions. Ruby itself is installed by mise in post-create.sh,
+#   from a precompiled build when one exists.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    sudo zsh curl ca-certificates jq \
+    git openssh-client \
+    build-essential libffi-dev libyaml-dev zlib1g-dev \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-# Install required packages for Ruby development
-# (Ruby itself is installed by mise in post-create.sh, from .ruby-version)
-RUN apt-get update \
-  && apt-get install -y  \
-  git \
-  openssh-client \
-  build-essential \
-  # fiddle
-  libffi-dev \
-  # psych
-  libyaml-dev \
-  # zlib
-  zlib1g-dev \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
+# Non-root user with passwordless sudo
+RUN groupadd --gid $USER_GID $USERNAME \
+  && useradd --uid $USER_UID --gid $USER_GID -m -s /bin/zsh $USERNAME \
+  && echo "$USERNAME ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME \
+  && chmod 0440 /etc/sudoers.d/$USERNAME
 
 ENV HOME=/home/$USERNAME
 
 USER $USERNAME
 
 ENV PATH="$HOME/.local/bin:$PATH"
+
+# Mount point of the mise-data volume (compose.yaml), created here so that
+# the volume belongs to the user and not to root.
+RUN mkdir -p $HOME/.local/share/mise

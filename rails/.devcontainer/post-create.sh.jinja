@@ -8,7 +8,7 @@ echo "================="
 (
   cd                      \
   && mkdir -p .local/bin    \
-  && sudo apt update && sudo apt install -y dialog jq  \
+  && sudo apt update && sudo apt install -y dialog  \
   && {% if git_email %}GIT_EMAIL={{ git_email | quote }} {% endif %}sh -c "$(curl -fsLS get.chezmoi.io/lb)" -- init --apply https://github.com/nicolascochin/dotfiles.git \
   && echo "=> Dot files Installed"
 )

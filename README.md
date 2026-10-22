@@ -48,6 +48,7 @@ defaults:
 
 - Image Debian slim, utilisateur non root avec sudo et zsh.
 - Ruby et Node installés par mise à partir de `.ruby-version` et `.node-version`.
+- Ruby, Node et les gems (le dossier de mise) dans un volume nommé, `<slug>_mise-data` : une reconstruction du conteneur ne les réinstalle pas. Pour repartir de zéro, par exemple après une montée de version de Debian dans l'image : `podman volume rm <slug>_mise-data` (ou `docker volume rm`).
 - À la création du conteneur (`post-create.sh`) : dotfiles chezmoi, `gh auth login`, `mise install`, plugins Claude Code (ruby-lsp, superpowers, superpowers-ruby, caveman), puis `bin/setup --skip-server` s'il existe.
 - Configuration de Claude Code, de `gh` et session Proton Pass dans le `tmp/` du projet : elles survivent à une reconstruction du conteneur.
 - Extensions VS Code pour Rails : Ruby LSP, Herb, Tailwind, i18n, GitLens, etc.
