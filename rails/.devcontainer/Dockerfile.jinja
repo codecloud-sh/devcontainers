@@ -29,20 +29,6 @@ RUN apt-get update \
   zlib1g-dev \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
-{%- if stripe %}
-
-# Stripe CLI, to forward webhooks to the app locally
-RUN apt-get update \
-  && apt-get install -y gnupg \
-  && curl -fsSL https://packages.stripe.dev/api/security/keypair/stripe-cli-gpg/public \
-    | gpg --dearmor -o /usr/share/keyrings/stripe.gpg \
-  && echo "deb [signed-by=/usr/share/keyrings/stripe.gpg] https://packages.stripe.dev/stripe-cli-debian-local stable main" \
-    > /etc/apt/sources.list.d/stripe.list \
-  && apt-get update \
-  && apt-get install -y stripe \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
-{%- endif %}
 
 ENV HOME=/home/$USERNAME
 

@@ -35,7 +35,7 @@ Copier réapplique les changements du template en gardant les modifications fait
 | `redis` | non | Service Valkey et `REDIS_URL` |
 | `system_tests` | oui | Service Selenium, `SELENIUM_HOST` et `CAPYBARA_SERVER_PORT` |
 | `kamal` | oui | Accès au Docker/Podman de l'hôte et `KAMAL_REGISTRY_PASSWORD` |
-| `stripe` | non | Stripe CLI installé dans l'image |
+| `stripe` | non | Stripe CLI installé par son script officiel à la création du conteneur |
 
 Pour ne pas retaper les mêmes réponses, Copier lit des valeurs par défaut dans `~/.config/copier/settings.yml` sous Linux (ou dans le fichier indiqué par `COPIER_SETTINGS_PATH`) :
 
