@@ -1,0 +1,77 @@
+name: "{{ project_slug }}"
+
+services:
+  rails-app:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    hostname: {{ project_slug }}
+
+    volumes:
+    - ..:/workspaces/{{ project_slug }}:cached
+
+    # Garde le conteneur en vie quand aucun processus ne tourne
+    command: sleep infinity
+
+    # Pour exposer un port, utiliser "forwardPorts" dans devcontainer.json
+{%- if system_tests or redis or database != "sqlite3" %}
+    depends_on:
+{%- if system_tests %}
+    - selenium
+{%- endif %}
+{%- if redis %}
+    - redis
+{%- endif %}
+{%- if database == "postgresql" %}
+    - postgres
+{%- elif database == "mysql" %}
+    - mysql
+{%- endif %}
+{%- endif %}
+{%- if system_tests %}
+
+  selenium:
+    image: selenium/standalone-chromium
+    restart: unless-stopped
+{%- endif %}
+{%- if redis %}
+
+  redis:
+    image: valkey/valkey:9
+    restart: unless-stopped
+    volumes:
+    - redis-data:/data
+{%- endif %}
+{%- if database == "postgresql" %}
+
+  postgres:
+    image: postgres:18
+    restart: unless-stopped
+    volumes:
+    - postgres-data:/var/lib/postgresql
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+{%- elif database == "mysql" %}
+
+  mysql:
+    image: mysql:9.7
+    restart: unless-stopped
+    volumes:
+    - mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+      MYSQL_ROOT_HOST: "%"
+{%- endif %}
+{%- if redis or database != "sqlite3" %}
+
+volumes:
+{%- if redis %}
+  redis-data:
+{%- endif %}
+{%- if database == "postgresql" %}
+  postgres-data:
+{%- elif database == "mysql" %}
+  mysql-data:
+{%- endif %}
+{%- endif %}

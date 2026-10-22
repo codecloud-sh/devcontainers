@@ -1,0 +1,55 @@
+FROM debian:stable-slim
+ARG USERNAME={{ username }}
+ARG USER_GID=1000
+ARG USER_UID=1000
+
+# Create the user
+RUN groupadd --gid $USER_GID $USERNAME \
+  && apt-get update \
+  && apt-get install -y sudo zsh curl \
+  && useradd --uid $USER_UID --gid $USER_GID -m  -s /bin/zsh $USERNAME \
+  # Add sudo support
+  && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+  && chmod 0440 /etc/sudoers.d/$USERNAME \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
+# Install required packages for Ruby development
+# (Ruby itself is installed by mise in post-create.sh, from .ruby-version)
+RUN apt-get update \
+  && apt-get install -y  \
+  git \
+  openssh-client \
+  build-essential \
+  # fiddle
+  libffi-dev \
+  # psych
+  libyaml-dev \
+  # zlib
+  zlib1g-dev \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+{%- if stripe %}
+
+# Stripe CLI, to forward webhooks to the app locally
+RUN apt-get update \
+  && apt-get install -y gnupg \
+  && curl -fsSL https://packages.stripe.dev/api/security/keypair/stripe-cli-gpg/public \
+    | gpg --dearmor -o /usr/share/keyrings/stripe.gpg \
+  && echo "deb [signed-by=/usr/share/keyrings/stripe.gpg] https://packages.stripe.dev/stripe-cli-debian-local stable main" \
+    > /etc/apt/sources.list.d/stripe.list \
+  && apt-get update \
+  && apt-get install -y stripe \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+{%- endif %}
+
+ENV HOME=/home/$USERNAME
+
+USER $USERNAME
+
+ENV PATH="$HOME/.local/bin:$PATH"
+
+# Ensure binding is always 0.0.0.0
+# Binds the server to all IP addresses of the container, so it can be accessed from outside the container.
+ENV BINDING="0.0.0.0"

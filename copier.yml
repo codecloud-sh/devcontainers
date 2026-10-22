@@ -1,0 +1,70 @@
+# Template Copier pour générer le dossier .devcontainer d'un projet.
+# Une seule stack pour l'instant : Ruby on Rails (dossier rails/).
+# Pour en ajouter une autre plus tard : une question `stack`
+# et `_subdirectory: "{{ stack }}"`.
+
+_min_copier_version: "9.4.0"
+_subdirectory: rails
+_answers_file: .devcontainer/.copier-answers.yml
+
+_message_after_copy: |
+  Devcontainer prêt dans .devcontainer/.
+  Pour récupérer plus tard les évolutions du template :
+    uvx copier update -a .devcontainer/.copier-answers.yml
+
+project_name:
+  type: str
+  help: Nom du devcontainer, affiché dans VS Code
+  default: "{{ _folder_name }}"
+
+project_slug:
+  type: str
+  help: Identifiant court (projet compose, hostname et dossier /workspaces/<slug> dans le conteneur)
+  default: "{{ project_name | lower | regex_replace('[^a-z0-9]+', '-') | trim('-') }}"
+  validator: >-
+    {% if not (project_slug | regex_search('^[a-z0-9][a-z0-9-]*$')) %}
+    Minuscules, chiffres et tirets uniquement
+    {% endif %}
+
+username:
+  type: str
+  help: Utilisateur créé dans le conteneur
+  default: dev
+  validator: >-
+    {% if not (username | regex_search('^[a-z_][a-z0-9_-]*$')) %}
+    Nom d'utilisateur Linux invalide
+    {% endif %}
+
+git_email:
+  type: str
+  help: Email Git passé à tes dotfiles (vide = chezmoi le demandera à la création du conteneur)
+  default: ""
+
+database:
+  type: str
+  help: Base de données
+  choices:
+    SQLite: sqlite3
+    PostgreSQL: postgresql
+    MySQL: mysql
+  default: sqlite3
+
+redis:
+  type: bool
+  help: Redis (Valkey) ? Inutile avec Solid Cache, Solid Queue et Solid Cable
+  default: false
+
+system_tests:
+  type: bool
+  help: Tests système avec Selenium (Chromium dans un conteneur à part) ?
+  default: true
+
+kamal:
+  type: bool
+  help: Déploiement avec Kamal (accès au Docker/Podman de l'hôte depuis le conteneur) ?
+  default: true
+
+stripe:
+  type: bool
+  help: Stripe CLI (relais des webhooks de test vers l'app locale) ?
+  default: false
