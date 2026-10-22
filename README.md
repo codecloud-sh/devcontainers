@@ -2,7 +2,7 @@
 
 Template [Copier](https://copier.readthedocs.io/) pour générer le dossier `.devcontainer` de mes projets.
 
-Stack disponible : **Ruby on Rails**.
+Stacks disponibles : **Ruby on Rails** (une par dossier, choisie par la première question).
 
 ## Utilisation
 
@@ -26,6 +26,7 @@ Copier réapplique les changements du template en gardant les modifications fait
 
 | Question | Défaut | Effet |
 | --- | --- | --- |
+| `stack` | Ruby on Rails | Dossier du template utilisé (`rails/`) |
 | `project_name` | nom du dossier | Nom du devcontainer dans VS Code |
 | `project_slug` | dérivé du nom | Nom du projet compose, hostname du conteneur et dossier de travail (`/workspaces/<slug>`) |
 | `username` | `dev` | Utilisateur créé dans le conteneur |
@@ -59,7 +60,11 @@ defaults:
 
 ## Faire évoluer le template
 
-Les fichiers sont dans `rails/`, les questions dans `copier.yml`. Après une modification, taguer une nouvelle version : `copier update` se base sur les tags Git.
+Les fichiers de chaque stack sont dans son dossier (`rails/`), les questions dans `copier.yml`. Les questions propres à une stack ont une condition `when` sur `stack` : `database`, `redis`, `system_tests`, `kamal` et `stripe` ne sont posées que pour Rails.
+
+Pour ajouter une stack : créer son dossier avec un `.devcontainer/` et le fichier `{{ _copier_conf.answers_file }}.jinja`, l'ajouter aux choix de `stack` et conditionner ses questions propres.
+
+Après une modification, taguer une nouvelle version : `copier update` se base sur les tags Git.
 
 ```bash
 git tag v0.2.0 && git push --tags

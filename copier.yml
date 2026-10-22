@@ -1,16 +1,23 @@
 # Template Copier pour générer le dossier .devcontainer d'un projet.
-# Une seule stack pour l'instant : Ruby on Rails (dossier rails/).
-# Pour en ajouter une autre plus tard : une question `stack`
-# et `_subdirectory: "{{ stack }}"`.
+# Chaque stack a son dossier (rails/, ...), choisi par la question `stack`.
+# Pour en ajouter une : créer son dossier, l'ajouter aux choix de `stack`
+# et conditionner ses questions propres avec `when`.
 
 _min_copier_version: "9.4.0"
-_subdirectory: rails
+_subdirectory: "{{ stack }}"
 _answers_file: .devcontainer/.copier-answers.yml
 
 _message_after_copy: |
   Devcontainer prêt dans .devcontainer/.
   Pour récupérer plus tard les évolutions du template :
     uvx copier update -a .devcontainer/.copier-answers.yml
+
+stack:
+  type: str
+  help: Stack du projet
+  choices:
+    Ruby on Rails: rails
+  default: rails
 
 project_name:
   type: str
@@ -42,6 +49,7 @@ git_email:
 
 database:
   type: str
+  when: "{{ stack == 'rails' }}"
   help: Base de données
   choices:
     SQLite: sqlite3
@@ -51,20 +59,24 @@ database:
 
 redis:
   type: bool
+  when: "{{ stack == 'rails' }}"
   help: Redis (Valkey) ? Inutile avec Solid Cache, Solid Queue et Solid Cable
   default: false
 
 system_tests:
   type: bool
+  when: "{{ stack == 'rails' }}"
   help: Tests système avec Selenium (Chromium dans un conteneur à part) ?
   default: true
 
 kamal:
   type: bool
+  when: "{{ stack == 'rails' }}"
   help: Déploiement avec Kamal (accès au Docker/Podman de l'hôte depuis le conteneur) ?
   default: true
 
 stripe:
   type: bool
+  when: "{{ stack == 'rails' }}"
   help: Stripe CLI (relais des webhooks de test vers l'app locale) ?
   default: false
