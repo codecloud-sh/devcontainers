@@ -14,6 +14,8 @@ services:
 
     # Garde le conteneur en vie quand aucun processus ne tourne
     command: sleep infinity
+    # PID 1 qui transmet les signaux (arrêt immédiat) et récolte les processus zombies
+    init: true
 
     # Pour exposer un port, utiliser "forwardPorts" dans devcontainer.json
 {%- if system_tests or redis or database != "sqlite3" %}
