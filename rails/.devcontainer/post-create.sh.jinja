@@ -53,6 +53,20 @@ echo "=> mise install completed."
 
 echo
 echo "================="
+echo "Ruby LSP"
+echo "================="
+# Language server of the ruby-lsp Claude Code plugin (the VS Code extension manages
+# its own copy). Installed in the mise Ruby, kept across rebuilds by the mise-data volume.
+if command -v gem >/dev/null 2>&1; then
+  gem list -i ruby-lsp >/dev/null 2>&1 || gem install ruby-lsp --no-document
+  mise reshim
+  echo "=> ruby-lsp installed."
+else
+  echo "=> No Ruby yet, ruby-lsp not installed."
+fi
+
+echo
+echo "================="
 echo "Claude settings..."
 echo "================="
 # User settings of Claude Code in the container (CLAUDE_CONFIG_DIR, under tmp/):
@@ -74,7 +88,15 @@ claude plugin marketplace add codecloud-sh/claude-plugins --scope project
 claude plugin marketplace add JuliusBrussee/caveman
 
 claude plugin install stack-rails@codecloud --scope project
+claude plugin install ruby-lsp@claude-plugins-official --scope project \
+  || echo "=> ruby-lsp plugin not installed."
 claude plugin install caveman@caveman --scope project --yes
+
+# Auto-update of the codecloud marketplace: off by default for a third-party
+# marketplace. On, Claude Code refreshes it in the background during sessions.
+project_settings=.claude/settings.json
+jq '.extraKnownMarketplaces.codecloud.autoUpdate = true' "$project_settings" > "$project_settings.tmp" \
+  && mv "$project_settings.tmp" "$project_settings"
 echo "=> Claude plugins installation completed."
 
 echo
