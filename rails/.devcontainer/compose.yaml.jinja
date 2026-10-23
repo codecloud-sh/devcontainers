@@ -9,7 +9,7 @@ services:
 
     volumes:
     - ..:/workspaces/{{ project_slug }}:cached
-    # Ruby, Node et gems installés par mise : gardés d'une reconstruction à l'autre
+    # Ruby, Node ou Bun et gems installés par mise : gardés d'une reconstruction à l'autre
     - mise-data:/home/{{ username }}/.local/share/mise
 
     # Garde le conteneur en vie quand aucun processus ne tourne
