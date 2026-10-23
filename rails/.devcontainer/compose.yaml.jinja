@@ -11,6 +11,8 @@ services:
     - ..:/workspaces/{{ project_slug }}:cached
     # Ruby, Node ou Bun et gems installés par mise : gardés d'une reconstruction à l'autre
     - mise-data:/home/{{ username }}/.local/share/mise
+    # Connexion de gh : un seul jeton par machine, partagé par tous les projets
+    - gh-config:/home/{{ username }}/.config/gh
 
     # Garde le conteneur en vie quand aucun processus ne tourne
     command: sleep infinity
@@ -76,6 +78,10 @@ services:
 
 volumes:
   mise-data:
+  # Nom fixe, sans le préfixe du projet compose : le même volume pour tous les
+  # projets de la machine, Rails comme Astro
+  gh-config:
+    name: devcontainers-gh
 {%- if redis %}
   redis-data:
 {%- endif %}

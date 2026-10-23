@@ -27,6 +27,6 @@ USER $USERNAME
 
 ENV PATH="$HOME/.local/bin:$PATH"
 
-# Mount points of the mise-data and playwright-browsers volumes (devcontainer.json),
-# created here so that the volumes belong to the user and not to root.
-RUN mkdir -p $HOME/.local/share/mise $HOME/.cache/ms-playwright
+# Mount points of the mise-data, playwright-browsers and devcontainers-gh volumes
+# (devcontainer.json), created here so that the volumes belong to the user and not to root.
+RUN mkdir -p $HOME/.local/share/mise $HOME/.cache/ms-playwright $HOME/.config/gh

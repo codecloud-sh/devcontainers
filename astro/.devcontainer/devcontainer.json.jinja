@@ -21,6 +21,12 @@
       "source": "{{ project_slug }}_playwright-browsers",
       "target": "/home/{{ username }}/.cache/ms-playwright",
       "type": "volume"
+    },
+    // Connexion de gh : un seul jeton par machine, partagé par tous les projets, Rails comme Astro
+    {
+      "source": "devcontainers-gh",
+      "target": "/home/{{ username }}/.config/gh",
+      "type": "volume"
     }
   ],
   // Features : https://containers.dev/features
@@ -34,7 +40,6 @@
     "MISE_IDIOMATIC_VERSION_FILE_ENABLE_TOOLS": "node,bun",
     "VISUAL": "code --wait",
     "CLAUDE_CONFIG_DIR": "${containerWorkspaceFolder}/tmp/claude",
-    "GH_CONFIG_DIR": "${containerWorkspaceFolder}/tmp/gh",
     "GIT_EMAIL": "${localEnv:GIT_EMAIL}",
     "CAVEMAN_DEFAULT_MODE": "full"
   },

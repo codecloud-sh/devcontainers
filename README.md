@@ -49,9 +49,11 @@ defaults:
 - mise installé dans l'image par la feature `devcontainers-extra/features/mise` (`/usr/local/bin/mise`). Il installe ce que le projet déclare : Ruby (`.ruby-version`), Node (`.node-version`) ou Bun (`.bun-version`). Avec Bun, le `.bun-version` est à créer soi-même : `bun --version > .bun-version`.
 - Ce qu'installe mise (Ruby, Node ou Bun, gems) dans un volume nommé, `<slug>_mise-data` : une reconstruction du conteneur ne le réinstalle pas. Pour repartir de zéro, par exemple après une montée de version de Debian dans l'image : `podman volume rm <slug>_mise-data` (ou `docker volume rm`).
 - Un vrai PID 1 (`init`) : le conteneur s'arrête tout de suite et les processus zombies sont récoltés.
-- Configuration de Claude Code et de `gh` dans le `tmp/` du projet : elle survit à une reconstruction du conteneur.
+- Configuration de Claude Code dans le `tmp/` du projet : elle survit à une reconstruction du conteneur.
+- Connexion de `gh` dans un volume nommé commun à tous les projets de la machine, Rails comme Astro, `devcontainers-gh` (monté sur `~/.config/gh`) : un seul jeton par machine. GitHub garde au plus 10 jetons de GitHub CLI par compte et révoque au-delà le moins récemment utilisé : avec un jeton par projet, rouvrir un vieux projet finissait en `HTTP 401: Bad credentials`. Hors du workspace, le volume survit aux reconstructions et n'est pas synchronisé entre machines. Pour se déconnecter de tous les conteneurs de la machine : `podman volume rm devcontainers-gh` (ou `docker volume rm`), conteneurs arrêtés. Un `docker compose down -v` sur un projet Rails le supprime aussi : il suffit de se reconnecter.
+- Projets générés avant le volume `devcontainers-gh` : après `copier update` et une reconstruction, `tmp/gh` ne sert plus et peut être supprimé.
 - Réglages utilisateur de Claude Code (`tmp/claude/settings.json`) : pas d'attribution dans les commits et les PR. `post-create.sh` les fusionne avec les réglages existants.
-- À la création du conteneur (`post-create.sh`), dans l'ordre : dotfiles chezmoi, `gh auth login`, proposition d'un fichier de version pour un nouveau projet, `mise install`, la gem `ruby-lsp` pour Rails, réglages de Claude Code, plugins Claude Code (marketplace `codecloud-sh/claude-plugins` et caveman), Playwright pour Astro, puis installation du projet.
+- À la création du conteneur (`post-create.sh`), dans l'ordre : dotfiles chezmoi, `gh auth login` si la machine n'a pas encore de jeton valide, proposition d'un fichier de version pour un nouveau projet, `mise install`, la gem `ruby-lsp` pour Rails, réglages de Claude Code, plugins Claude Code (marketplace `codecloud-sh/claude-plugins` et caveman), Playwright pour Astro, puis installation du projet.
 
 ## Ruby on Rails
 
@@ -73,7 +75,7 @@ defaults:
 - Plugins du marketplace `codecloud` toujours à jour, sans intervention : à chaque démarrage du conteneur (`post-start.sh`), `codecloud-core` et `stack-astro` sont mis à jour avant l'ouverture de toute session ; pendant une session, l'auto-update du marketplace (`autoUpdate` dans `.claude/settings.json`, posé par `post-create.sh`) télécharge les nouvelles versions en arrière-plan, chargées à la session suivante ou avec `/reload-plugins`.
 - Playwright (paquet npm global) et Chromium avec ses bibliothèques système, pour les captures d'écran des PR et des maquettes (skill `stack-astro:captures`), hors du projet. Le paquet est dans le volume de mise et Chromium dans le volume `<slug>_playwright-browsers` : une reconstruction ne retélécharge pas Chromium, seules ses bibliothèques système sont réinstallées. Une nouvelle version de Playwright télécharge sa version de Chromium et supprime l'ancienne.
 - Installation du projet selon le fichier de verrouillage : `bun install` (`bun.lock`), `npm ci` (`package-lock.json`) ou `npm install`.
-- `tmp/.gitignore` créé s'il manque : le `.gitignore` d'Astro ne couvre pas `tmp/`, qui contient les jetons de `gh` et de Claude Code.
+- `tmp/.gitignore` créé s'il manque : le `.gitignore` d'Astro ne couvre pas `tmp/`, qui contient la configuration de Claude Code, jetons compris.
 - Port redirigé : 4321 (serveur de dev Astro).
 - Extensions VS Code : Astro, Prettier (formatage à l'enregistrement), Tailwind, GitLens, etc.
 
