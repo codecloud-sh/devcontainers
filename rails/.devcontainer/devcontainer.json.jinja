@@ -8,7 +8,9 @@
   "workspaceFolder": "/workspaces/{{ project_slug }}",
   // Features : https://containers.dev/features
   "features": {
+    // Dernière version de gh (option "version" à "latest" par défaut) : nécessaire pour `gh pr create --attach`
     "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers-extra/features/mise:1": {},
     "ghcr.io/rails/devcontainer/features/activestorage": {},
 {%- if kamal %}
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
@@ -78,7 +80,7 @@
       ],
       "settings": {
         "rubyLsp.rubyVersionManager": {
-          "miseExecutablePath": "/home/{{ username }}/.local/bin/mise",
+          "miseExecutablePath": "/usr/local/bin/mise",
           "identifier": "auto"
         },
         "git.detectWorktrees": true,

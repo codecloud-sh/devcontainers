@@ -74,9 +74,3 @@ kamal:
   when: "{{ stack == 'rails' }}"
   help: Déploiement avec Kamal (accès au Docker/Podman de l'hôte depuis le conteneur) ?
   default: true
-
-stripe:
-  type: bool
-  when: "{{ stack == 'rails' }}"
-  help: Stripe CLI (relais des webhooks de test vers l'app locale) ?
-  default: false

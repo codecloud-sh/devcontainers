@@ -41,16 +41,6 @@ claude plugin install superpowers-ruby@superpowers-ruby --scope project --yes
 claude plugin install caveman@caveman --scope project --yes
 echo "=> Claude plugins installation completed."
 
-{%- if stripe %}
-
-echo
-echo "================="
-echo "Install Stripe CLI..."
-echo "================="
-curl -fsSL https://cli.stripe.com/install.sh | sh
-echo "=> Stripe CLI installation completed."
-{%- endif %}
-
 echo
 echo "================="
 echo "Running setup script..."
