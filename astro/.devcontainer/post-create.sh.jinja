@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+set -e
+
+# tmp/ holds the Claude Code and gh configuration, tokens included. Astro's
+# .gitignore doesn't cover it: tmp/.gitignore keeps the whole folder out of Git.
+mkdir -p tmp
+[ -e tmp/.gitignore ] || echo '*' > tmp/.gitignore
+
+echo
+echo "================="
+echo "Install dot files"
+echo "================="
+(
+  cd                      \
+  && mkdir -p .local/bin    \
+  && sh -c "$(curl -fsLS get.chezmoi.io/lb)" -- init --apply https://github.com/nicolascochin/dotfiles.git \
+  && echo "=> Dot files Installed"
+)
+echo
+echo "================="
+echo "Github login"
+echo "================="
+(
+  gh auth status >/dev/null 2>&1 || gh auth login
+)
+echo
+echo "================="
+echo "Node version"
+echo "================="
+# New project (no .node-version, .nvmrc, .bun-version nor package.json): offer the
+# latest Node LTS, so that mise install has a runtime to install. Without a terminal, create it.
+if [ ! -e .node-version ] && [ ! -e .nvmrc ] && [ ! -e .bun-version ] && [ ! -e package.json ]; then
+  lts=$(curl -fsSL https://nodejs.org/dist/index.json 2>/dev/null \
+    | jq -r 'map(select(.lts != false))[0].version // empty' 2>/dev/null \
+    | sed 's/^v//' || true)
+  if ! printf '%s' "$lts" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+    echo "=> Latest Node LTS not found, no .node-version created."
+  else
+    answer=y
+    if [ -t 0 ]; then
+      printf 'No .node-version: create it with Node %s (latest LTS)? [Y/n] ' "$lts"
+      read -r answer || answer=y
+    fi
+    case "$answer" in
+      [nN]*) echo "=> No .node-version created." ;;
+      *) echo "$lts" > .node-version && echo "=> .node-version created: $lts" ;;
+    esac
+  fi
+else
+  echo "=> Node or Bun version already set by the project."
+fi
+
+echo
+echo "================="
+echo "mise install"
+echo "================="
+mise install
+eval "$(mise env)" # Activate mise for this script so it finds the installed tools
+echo "=> mise install completed."
+
+echo
+echo "================="
+echo "Claude settings..."
+echo "================="
+# User settings of Claude Code in the container (CLAUDE_CONFIG_DIR, under tmp/):
+# no attribution in commits and pull requests. Merged, other settings are kept.
+settings="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/settings.json"
+mkdir -p "$(dirname "$settings")"
+[ -s "$settings" ] || echo '{}' > "$settings"
+jq '.attribution = {"commit": "", "pr": "", "sessionUrl": false}' "$settings" > "$settings.tmp" \
+  && mv "$settings.tmp" "$settings"
+echo "=> Claude settings updated."
+
+echo
+echo "================="
+echo "Install claude plugins..."
+echo "================="
+claude plugin marketplace add codecloud-sh/claude-plugins --scope project
+claude plugin marketplace add JuliusBrussee/caveman
+
+# stack-astro pulls codecloud-core as a dependency and declares the Astro Docs MCP server.
+claude plugin install stack-astro@codecloud --scope project
+claude plugin install caveman@caveman --scope project --yes
+
+# Auto-update of the codecloud marketplace: off by default for a third-party marketplace.
+# On, Claude Code refreshes it in the background during sessions.
+project_settings=.claude/settings.json
+jq '.extraKnownMarketplaces.codecloud.autoUpdate = true' "$project_settings" > "$project_settings.tmp" \
+  && mv "$project_settings.tmp" "$project_settings"
+echo "=> Claude plugins installation completed."
+
+echo
+echo "================="
+echo "Install Playwright and Chromium..."
+echo "================="
+# Screenshots of pages and mockups (stack-astro:captures skill), outside the project:
+# Playwright in Node's global packages (mise-data volume), Chromium in the
+# playwright-browsers volume: downloaded again only when Playwright needs a new
+# revision. Its system libraries (--with-deps) are reinstalled at each rebuild.
+if npm install -g playwright && playwright install --with-deps chromium; then
+  echo "=> Playwright and Chromium installed."
+else
+  echo "=> Playwright not installed: screenshots unavailable."
+fi
+
+echo
+echo "================="
+echo "Install project dependencies..."
+echo "================="
+if [ -e bun.lock ] || [ -e bun.lockb ]; then
+  bun install --frozen-lockfile
+elif [ -e package-lock.json ]; then
+  npm ci
+elif [ -e package.json ]; then
+  npm install
+else
+  echo "=> No package.json yet (project not created?), skipping."
+fi
+echo "post-create.sh completed."

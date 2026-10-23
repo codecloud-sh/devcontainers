@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Runs at every container start: keeps the codecloud Claude Code plugins up to date before
+# any session opens. Never blocks the start: every failure is reported and skipped.
+
+echo "Update codecloud Claude plugins..."
+if ! command -v claude >/dev/null 2>&1; then
+  echo "=> claude not installed yet, skipping."
+  exit 0
+fi
+
+claude plugin marketplace update codecloud || echo "=> codecloud marketplace not refreshed."
+for plugin in codecloud-core@codecloud stack-astro@codecloud; do
+  claude plugin update "$plugin" || echo "=> $plugin not updated."
+done
+echo "=> codecloud Claude plugins up to date."
+exit 0
