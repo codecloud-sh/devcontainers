@@ -51,9 +51,6 @@
   // Ports du conteneur accessibles en local
   "forwardPorts": [
     3000, // Rails
-{%- if redis %}
-    6379, // Redis
-{%- endif %}
     8592 // Serveur de dev Herb (barre d'outils ReActionView)
   ],
   "customizations": {
