@@ -9,7 +9,7 @@ echo "================="
   cd                      \
   && mkdir -p .local/bin    \
   && sudo apt update && sudo apt install -y dialog  \
-  && {% if git_email %}GIT_EMAIL={{ git_email | quote }} {% endif %}sh -c "$(curl -fsLS get.chezmoi.io/lb)" -- init --apply https://github.com/nicolascochin/dotfiles.git \
+  && sh -c "$(curl -fsLS get.chezmoi.io/lb)" -- init --apply https://github.com/nicolascochin/dotfiles.git \
   && echo "=> Dot files Installed"
 )
 echo
@@ -32,12 +32,11 @@ echo "================="
 echo "Install claude plugins..."
 echo "================="
 claude plugin marketplace add anthropics/claude-plugins-official || true
-claude plugin marketplace add lucianghinda/superpowers-ruby
+claude plugin marketplace add lucianghinda/superpowers-ruby --scope project
+claude plugin marketplace add codecloud-sh/claude-plugins --scope project
 claude plugin marketplace add JuliusBrussee/caveman
 
-claude plugin install ruby-lsp@claude-plugins-official --scope project --yes
-claude plugin install superpowers@claude-plugins-official --scope project --yes
-claude plugin install superpowers-ruby@superpowers-ruby --scope project --yes
+claude plugin install stack-rails@codecloud --scope project
 claude plugin install caveman@caveman --scope project --yes
 echo "=> Claude plugins installation completed."
 

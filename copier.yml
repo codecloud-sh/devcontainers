@@ -42,11 +42,6 @@ username:
     Nom d'utilisateur Linux invalide
     {% endif %}
 
-git_email:
-  type: str
-  help: Email Git passé à tes dotfiles (vide = chezmoi le demandera à la création du conteneur)
-  default: ""
-
 database:
   type: str
   when: "{{ stack == 'rails' }}"

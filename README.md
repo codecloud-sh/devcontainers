@@ -30,7 +30,6 @@ Copier réapplique les changements du template en gardant les modifications fait
 | `project_name` | nom du dossier | Nom du devcontainer dans VS Code |
 | `project_slug` | dérivé du nom | Nom du projet compose, hostname du conteneur et dossier de travail (`/workspaces/<slug>`) |
 | `username` | `dev` | Utilisateur créé dans le conteneur |
-| `git_email` | vide | Email Git passé aux dotfiles. Vide : chezmoi le demande à la création du conteneur |
 | `database` | SQLite | Feature client, service compose et `DB_HOST` pour PostgreSQL ou MySQL (plus `DB_USER` et `DB_PASSWORD` pour PostgreSQL) |
 | `redis` | non | Service Valkey et `REDIS_URL` |
 | `system_tests` | oui | Service Selenium, `SELENIUM_HOST` et `CAPYBARA_SERVER_PORT` |
@@ -39,7 +38,7 @@ Pour ne pas retaper les mêmes réponses, Copier lit des valeurs par défaut dan
 
 ```yaml
 defaults:
-  git_email: moi@example.com
+  username: nico
 ```
 
 ## Contenu du devcontainer
@@ -48,7 +47,7 @@ defaults:
 - Accès au Docker/Podman de l'hôte depuis le conteneur (feature docker-outside-of-docker).
 - mise installé dans l'image par la feature `devcontainers-extra/features/mise` (`/usr/local/bin/mise`). Il installe Ruby et Node à partir de `.ruby-version` et `.node-version`.
 - Ruby, Node et les gems (le dossier de mise) dans un volume nommé, `<slug>_mise-data` : une reconstruction du conteneur ne les réinstalle pas. Pour repartir de zéro, par exemple après une montée de version de Debian dans l'image : `podman volume rm <slug>_mise-data` (ou `docker volume rm`).
-- À la création du conteneur (`post-create.sh`) : dotfiles chezmoi, `gh auth login`, `mise install`, plugins Claude Code (ruby-lsp, superpowers, superpowers-ruby, caveman), puis `bin/setup --skip-server` s'il existe.
+- À la création du conteneur (`post-create.sh`) : dotfiles chezmoi, `gh auth login`, `mise install`, plugins Claude Code (`stack-rails` du marketplace `codecloud-sh/claude-plugins`, qui tire `codecloud-core` et `superpowers-ruby`, et caveman), puis `bin/setup --skip-server` s'il existe.
 - Configuration de Claude Code et de `gh` dans le `tmp/` du projet : elle survit à une reconstruction du conteneur.
 - Extensions VS Code pour Rails : Ruby LSP, Herb, Tailwind, i18n, GitLens, etc.
 
