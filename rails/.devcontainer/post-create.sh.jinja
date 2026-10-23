@@ -92,10 +92,11 @@ claude plugin install ruby-lsp@claude-plugins-official --scope project \
   || echo "=> ruby-lsp plugin not installed."
 claude plugin install caveman@caveman --scope project --yes
 
-# Auto-update of the codecloud marketplace: off by default for a third-party
-# marketplace. On, Claude Code refreshes it in the background during sessions.
+# Auto-update of the codecloud and superpowers-ruby marketplaces: off by default for
+# a third-party marketplace. On, Claude Code refreshes them in the background during sessions.
 project_settings=.claude/settings.json
-jq '.extraKnownMarketplaces.codecloud.autoUpdate = true' "$project_settings" > "$project_settings.tmp" \
+jq '.extraKnownMarketplaces.codecloud.autoUpdate = true
+  | .extraKnownMarketplaces["superpowers-ruby"].autoUpdate = true' "$project_settings" > "$project_settings.tmp" \
   && mv "$project_settings.tmp" "$project_settings"
 echo "=> Claude plugins installation completed."
 

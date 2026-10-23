@@ -1,18 +1,20 @@
 #!/usr/bin/env bash
-# Run at each start of the container: brings the plugins of the codecloud marketplace
-# up to date before any Claude Code session opens. During a session, the marketplace
-# auto-update (set by post-create.sh) takes over.
+# Run at each start of the container: brings the plugins of the codecloud and
+# superpowers-ruby marketplaces up to date before any Claude Code session opens.
+# During a session, the marketplace auto-update (set by post-create.sh) takes over.
 # Never blocks the start: a failure is only reported.
 
-echo "Update codecloud Claude plugins..."
+echo "Update Claude plugins (codecloud, superpowers-ruby)..."
 if ! command -v claude >/dev/null 2>&1; then
   echo "=> claude not installed yet, skipping."
   exit 0
 fi
 
-claude plugin marketplace update codecloud || echo "=> codecloud marketplace not refreshed."
-for plugin in codecloud-core@codecloud stack-rails@codecloud; do
+for marketplace in codecloud superpowers-ruby; do
+  claude plugin marketplace update "$marketplace" || echo "=> $marketplace marketplace not refreshed."
+done
+for plugin in codecloud-core@codecloud stack-rails@codecloud superpowers-ruby@superpowers-ruby; do
   claude plugin update "$plugin" || echo "=> $plugin not updated."
 done
-echo "=> codecloud Claude plugins up to date."
+echo "=> Claude plugins up to date."
 exit 0
