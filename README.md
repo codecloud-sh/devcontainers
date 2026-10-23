@@ -9,7 +9,7 @@ Stacks disponibles : **Ruby on Rails** (une par dossier, choisie par la premièr
 Dans le dossier du projet :
 
 ```bash
-uvx copier copy gh:nicolascochin/devcontainers .
+uvx copier copy gh:codecloud-sh/devcontainers .
 ```
 
 Copier pose quelques questions, puis écrit `.devcontainer/`. Les réponses sont enregistrées dans `.devcontainer/.copier-answers.yml`, à commiter avec le reste.
@@ -21,6 +21,8 @@ uvx copier update -a .devcontainer/.copier-answers.yml
 ```
 
 Copier réapplique les changements du template en gardant les modifications faites dans le projet. En cas de conflit, il laisse des marqueurs à résoudre comme pour un merge.
+
+Les projets générés quand le repo s'appelait `nicolascochin/devcontainers` gardent cette adresse dans le `_src_path` de `.devcontainer/.copier-answers.yml`. GitHub redirige l'ancienne adresse, donc `copier update` marche toujours, mais il vaut mieux la remplacer par `gh:codecloud-sh/devcontainers` et commiter.
 
 ## Questions
 
