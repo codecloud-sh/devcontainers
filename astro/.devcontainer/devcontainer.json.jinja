@@ -1,0 +1,66 @@
+// Généré avec nicolascochin/devcontainers (Copier). Pour le mettre à jour :
+//   uvx copier update -a .devcontainer/.copier-answers.yml
+// Format : https://containers.dev/implementors/json_reference/
+{
+  "name": "{{ project_name }}",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "runArgs": ["--hostname={{ project_slug }}"],
+  // PID 1 qui transmet les signaux (arrêt immédiat) et récolte les processus zombies
+  "init": true,
+  "mounts": [
+    // Node ou Bun et paquets globaux installés par mise : gardés d'une reconstruction à l'autre
+    {
+      "source": "{{ project_slug }}_mise-data",
+      "target": "/home/{{ username }}/.local/share/mise",
+      "type": "volume"
+    }
+  ],
+  // Features : https://containers.dev/features
+  "features": {
+    // Dernière version de gh (option "version" à "latest" par défaut) : nécessaire pour `gh pr create --attach`
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers-extra/features/mise:1": {},
+    "ghcr.io/jsburckhardt/devcontainer-features/rtk:1": {}
+  },
+  "containerEnv": {
+    "MISE_IDIOMATIC_VERSION_FILE_ENABLE_TOOLS": "node,bun",
+    "VISUAL": "code --wait",
+    "CLAUDE_CONFIG_DIR": "${containerWorkspaceFolder}/tmp/claude",
+    "GH_CONFIG_DIR": "${containerWorkspaceFolder}/tmp/gh",
+    "GIT_EMAIL": "${localEnv:GIT_EMAIL}",
+    "CAVEMAN_DEFAULT_MODE": "full"
+  },
+  // Ports du conteneur accessibles en local
+  "forwardPorts": [
+    4321 // Serveur de dev Astro
+  ],
+  "portsAttributes": {
+    "4321": {
+      "label": "Astro",
+      "onAutoForward": "notify"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "astro-build.astro-vscode",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "eamodio.gitlens",
+        "github.vscode-pull-request-github",
+        "Anthropic.claude-code",
+        "oderwat.indent-rainbow"
+      ],
+      "settings": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "[astro]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        }
+      }
+    }
+  },
+  "postCreateCommand": ".devcontainer/post-create.sh"
+}
