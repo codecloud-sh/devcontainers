@@ -67,7 +67,7 @@ defaults:
 - Nouveau projet (ni `.node-version`, `.nvmrc`, `.bun-version` ni `package.json`) : `.node-version` proposé avec la dernière version LTS de Node.
 - Plugin Claude Code `stack-astro`, qui tire `codecloud-core` et déclare le serveur MCP de la doc Astro : rien à ajouter avec `claude mcp add`.
 - Plugins du marketplace `codecloud` toujours à jour, sans intervention : à chaque démarrage du conteneur (`post-start.sh`), `codecloud-core` et `stack-astro` sont mis à jour avant l'ouverture de toute session ; pendant une session, l'auto-update du marketplace (`autoUpdate` dans `.claude/settings.json`, posé par `post-create.sh`) télécharge les nouvelles versions en arrière-plan, chargées à la session suivante ou avec `/reload-plugins`.
-- Playwright (paquet npm global) et Chromium avec ses bibliothèques système, pour les captures d'écran des PR et des maquettes (skill `stack-astro:captures`), hors du projet. Réinstallés à chaque reconstruction du conteneur.
+- Playwright (paquet npm global) et Chromium avec ses bibliothèques système, pour les captures d'écran des PR et des maquettes (skill `stack-astro:captures`), hors du projet. Le paquet est dans le volume de mise et Chromium dans le volume `<slug>_playwright-browsers` : une reconstruction ne retélécharge pas Chromium, seules ses bibliothèques système sont réinstallées. Une nouvelle version de Playwright télécharge sa version de Chromium et supprime l'ancienne.
 - Installation du projet selon le fichier de verrouillage : `bun install` (`bun.lock`), `npm ci` (`package-lock.json`) ou `npm install`.
 - `tmp/.gitignore` créé s'il manque : le `.gitignore` d'Astro ne couvre pas `tmp/`, qui contient les jetons de `gh` et de Claude Code.
 - Port redirigé : 4321 (serveur de dev Astro).

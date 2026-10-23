@@ -94,7 +94,9 @@ echo "================="
 echo "Install Playwright and Chromium..."
 echo "================="
 # Screenshots of pages and mockups (stack-astro:captures skill), outside the project:
-# Playwright in Node's global packages, Chromium and its system libraries.
+# Playwright in Node's global packages (mise-data volume), Chromium in the
+# playwright-browsers volume: downloaded again only when Playwright needs a new
+# revision. Its system libraries (--with-deps) are reinstalled at each rebuild.
 if npm install -g playwright && playwright install --with-deps chromium; then
   echo "=> Playwright and Chromium installed."
 else

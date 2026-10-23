@@ -15,6 +15,12 @@
       "source": "{{ project_slug }}_mise-data",
       "target": "/home/{{ username }}/.local/share/mise",
       "type": "volume"
+    },
+    // Navigateurs de Playwright (Chromium) : pas retéléchargés à chaque reconstruction
+    {
+      "source": "{{ project_slug }}_playwright-browsers",
+      "target": "/home/{{ username }}/.cache/ms-playwright",
+      "type": "volume"
     }
   ],
   // Features : https://containers.dev/features
