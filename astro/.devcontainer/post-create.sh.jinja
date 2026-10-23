@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
+# The container exec may run with umask 0000: without this, everything chezmoi
+# clones (oh-my-zsh and its plugins) ends up world-writable and oh-my-zsh
+# refuses to load its completions ("Insecure completion-dependent directories").
+umask 022
+
 # tmp/ holds the Claude Code configuration, tokens included. Astro's
 # .gitignore doesn't cover it: tmp/.gitignore keeps the whole folder out of Git.
 mkdir -p tmp
