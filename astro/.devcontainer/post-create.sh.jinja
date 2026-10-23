@@ -73,17 +73,33 @@ echo "=> Claude settings updated."
 
 echo
 echo "================="
-echo "Install claude plugins and MCP servers..."
+echo "Install claude plugins..."
 echo "================="
 claude plugin marketplace add codecloud-sh/claude-plugins --scope project
 claude plugin marketplace add JuliusBrussee/caveman
 
-claude plugin install codecloud-core@codecloud --scope project
+# stack-astro pulls codecloud-core as a dependency and declares the Astro Docs MCP server.
+claude plugin install stack-astro@codecloud --scope project
 claude plugin install caveman@caveman --scope project --yes
 
-claude mcp get astro-docs >/dev/null 2>&1 \
-  || claude mcp add --transport http astro-docs https://mcp.docs.astro.build/mcp
-echo "=> Claude plugins and MCP servers installation completed."
+# Auto-update of the codecloud marketplace: off by default for a third-party marketplace.
+# On, Claude Code refreshes it in the background during sessions.
+project_settings=.claude/settings.json
+jq '.extraKnownMarketplaces.codecloud.autoUpdate = true' "$project_settings" > "$project_settings.tmp" \
+  && mv "$project_settings.tmp" "$project_settings"
+echo "=> Claude plugins installation completed."
+
+echo
+echo "================="
+echo "Install Playwright and Chromium..."
+echo "================="
+# Screenshots of pages and mockups (stack-astro:captures skill), outside the project:
+# Playwright in Node's global packages, Chromium and its system libraries.
+if npm install -g playwright && playwright install --with-deps chromium; then
+  echo "=> Playwright and Chromium installed."
+else
+  echo "=> Playwright not installed: screenshots unavailable."
+fi
 
 echo
 echo "================="

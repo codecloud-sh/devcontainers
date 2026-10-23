@@ -49,7 +49,7 @@ defaults:
 - Un vrai PID 1 (`init`) : le conteneur s'arrête tout de suite et les processus zombies sont récoltés.
 - Configuration de Claude Code et de `gh` dans le `tmp/` du projet : elle survit à une reconstruction du conteneur.
 - Réglages utilisateur de Claude Code (`tmp/claude/settings.json`) : pas d'attribution dans les commits et les PR. `post-create.sh` les fusionne avec les réglages existants.
-- À la création du conteneur (`post-create.sh`), dans l'ordre : dotfiles chezmoi, `gh auth login`, proposition d'un fichier de version pour un nouveau projet, `mise install`, réglages de Claude Code, plugins Claude Code (marketplace `codecloud-sh/claude-plugins` et caveman), puis installation du projet.
+- À la création du conteneur (`post-create.sh`), dans l'ordre : dotfiles chezmoi, `gh auth login`, proposition d'un fichier de version pour un nouveau projet, `mise install`, réglages de Claude Code, plugins Claude Code (marketplace `codecloud-sh/claude-plugins` et caveman), Playwright pour Astro, puis installation du projet.
 
 ## Ruby on Rails
 
@@ -65,7 +65,9 @@ defaults:
 
 - Un seul conteneur, sans compose.
 - Nouveau projet (ni `.node-version`, `.nvmrc`, `.bun-version` ni `package.json`) : `.node-version` proposé avec la dernière version LTS de Node.
-- Plugin Claude Code `codecloud-core` et serveur MCP de la doc Astro.
+- Plugin Claude Code `stack-astro`, qui tire `codecloud-core` et déclare le serveur MCP de la doc Astro : rien à ajouter avec `claude mcp add`.
+- Plugins du marketplace `codecloud` toujours à jour, sans intervention : à chaque démarrage du conteneur (`post-start.sh`), `codecloud-core` et `stack-astro` sont mis à jour avant l'ouverture de toute session ; pendant une session, l'auto-update du marketplace (`autoUpdate` dans `.claude/settings.json`, posé par `post-create.sh`) télécharge les nouvelles versions en arrière-plan, chargées à la session suivante ou avec `/reload-plugins`.
+- Playwright (paquet npm global) et Chromium avec ses bibliothèques système, pour les captures d'écran des PR et des maquettes (skill `stack-astro:captures`), hors du projet. Réinstallés à chaque reconstruction du conteneur.
 - Installation du projet selon le fichier de verrouillage : `bun install` (`bun.lock`), `npm ci` (`package-lock.json`) ou `npm install`.
 - `tmp/.gitignore` créé s'il manque : le `.gitignore` d'Astro ne couvre pas `tmp/`, qui contient les jetons de `gh` et de Claude Code.
 - Port redirigé : 4321 (serveur de dev Astro).
