@@ -72,5 +72,5 @@ system_tests:
 kamal:
   type: bool
   when: "{{ stack == 'rails' }}"
-  help: Déploiement avec Kamal (accès au Docker/Podman de l'hôte depuis le conteneur) ?
+  help: Déploiement avec Kamal (KAMAL_REGISTRY_PASSWORD passé au conteneur) ?
   default: true

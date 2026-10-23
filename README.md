@@ -31,10 +31,10 @@ Copier réapplique les changements du template en gardant les modifications fait
 | `project_slug` | dérivé du nom | Nom du projet compose, hostname du conteneur et dossier de travail (`/workspaces/<slug>`) |
 | `username` | `dev` | Utilisateur créé dans le conteneur |
 | `git_email` | vide | Email Git passé aux dotfiles. Vide : chezmoi le demande à la création du conteneur |
-| `database` | SQLite | Feature client, service compose et `DB_HOST` pour PostgreSQL ou MySQL |
+| `database` | SQLite | Feature client, service compose et `DB_HOST` pour PostgreSQL ou MySQL (plus `DB_USER` et `DB_PASSWORD` pour PostgreSQL) |
 | `redis` | non | Service Valkey et `REDIS_URL` |
-| `system_tests` | oui | Service Selenium, `SELENIUM_HOST` et `CAPYBARA_SERVER_PORT` |
-| `kamal` | oui | Accès au Docker/Podman de l'hôte et `KAMAL_REGISTRY_PASSWORD` |
+| `system_tests` | oui | Service Selenium, `SELENIUM_URL` et `CAPYBARA_APP_HOST` |
+| `kamal` | oui | `KAMAL_REGISTRY_PASSWORD` passé au conteneur |
 
 Pour ne pas retaper les mêmes réponses, Copier lit des valeurs par défaut dans `~/.config/copier/settings.yml` sous Linux (ou dans le fichier indiqué par `COPIER_SETTINGS_PATH`) :
 
@@ -46,17 +46,19 @@ defaults:
 ## Contenu du devcontainer
 
 - Image Debian slim, utilisateur non root avec sudo et zsh.
+- Accès au Docker/Podman de l'hôte depuis le conteneur (feature docker-outside-of-docker).
 - mise installé dans l'image par la feature `devcontainers-extra/features/mise` (`/usr/local/bin/mise`). Il installe Ruby et Node à partir de `.ruby-version` et `.node-version`.
 - Ruby, Node et les gems (le dossier de mise) dans un volume nommé, `<slug>_mise-data` : une reconstruction du conteneur ne les réinstalle pas. Pour repartir de zéro, par exemple après une montée de version de Debian dans l'image : `podman volume rm <slug>_mise-data` (ou `docker volume rm`).
 - À la création du conteneur (`post-create.sh`) : dotfiles chezmoi, `gh auth login`, `mise install`, plugins Claude Code (ruby-lsp, superpowers, superpowers-ruby, caveman), puis `bin/setup --skip-server` s'il existe.
-- Configuration de Claude Code, de `gh` et session Proton Pass dans le `tmp/` du projet : elles survivent à une reconstruction du conteneur.
+- Configuration de Claude Code et de `gh` dans le `tmp/` du projet : elle survit à une reconstruction du conteneur.
 - Extensions VS Code pour Rails : Ruby LSP, Herb, Tailwind, i18n, GitLens, etc.
 
 ## Pré-requis côté hôte
 
-- `PROTON_PASS_ENCRYPTION_KEY` défini dans l'environnement de l'hôte (lu avec `${localEnv:...}`).
+- `GIT_EMAIL` défini dans l'environnement de l'hôte : il est passé au conteneur (`${localEnv:GIT_EMAIL}`) et lu par les dotfiles. Sinon, chezmoi demande l'email à la création du conteneur.
 - Avec Podman rootless : `userns = "keep-id"` dans `containers.conf` et le wrapper `getenforce` de mes dotfiles. Le template lui-même ne contient rien de propre à Podman.
-- Avec PostgreSQL ou MySQL : `config/database.yml` doit lire `DB_HOST`, comme le génère `rails new --devcontainer`.
+- Avec PostgreSQL : `config/database.yml` doit lire `DB_HOST`, `DB_USER` et `DB_PASSWORD`. Avec MySQL : `DB_HOST`.
+- Avec les tests système : `test/application_system_test_case.rb` doit lire `SELENIUM_URL` (navigateur distant) et `CAPYBARA_APP_HOST` (hôte du serveur de test).
 
 ## Faire évoluer le template
 

@@ -12,11 +12,9 @@
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers-extra/features/mise:1": {},
     "ghcr.io/rails/devcontainer/features/activestorage": {},
-{%- if kamal %}
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
       "moby": false
     },
-{%- endif %}
 {%- if database == "sqlite3" %}
     "ghcr.io/rails/devcontainer/features/sqlite3": {},
 {%- elif database == "postgresql" %}
@@ -30,14 +28,16 @@
     "MISE_IDIOMATIC_VERSION_FILE_ENABLE_TOOLS": "ruby,node",
     "BINDING": "0.0.0.0", // rails server écoute sur toutes les interfaces du conteneur
 {%- if system_tests %}
-    "CAPYBARA_SERVER_PORT": "45678",
-    "SELENIUM_HOST": "selenium",
+    "SELENIUM_URL": "http://selenium:4444",
+    "CAPYBARA_APP_HOST": "rails-app",
 {%- endif %}
 {%- if kamal %}
     "KAMAL_REGISTRY_PASSWORD": "$KAMAL_REGISTRY_PASSWORD",
 {%- endif %}
 {%- if database == "postgresql" %}
     "DB_HOST": "postgres",
+    "DB_USER": "postgres",
+    "DB_PASSWORD": "postgres",
 {%- elif database == "mysql" %}
     "DB_HOST": "mysql",
 {%- endif %}
@@ -47,9 +47,7 @@
     "VISUAL": "code --wait",
     "CLAUDE_CONFIG_DIR": "${containerWorkspaceFolder}/tmp/claude",
     "GH_CONFIG_DIR": "${containerWorkspaceFolder}/tmp/gh",
-    "PROTON_PASS_SESSION_DIR": "${containerWorkspaceFolder}/tmp/proton-pass",
-    "PROTON_PASS_KEY_PROVIDER": "env",
-    "PROTON_PASS_ENCRYPTION_KEY": "${localEnv:PROTON_PASS_ENCRYPTION_KEY}",
+    "GIT_EMAIL": "${localEnv:GIT_EMAIL}",
     "CAVEMAN_DEFAULT_MODE": "full"
   },
   // Ports du conteneur accessibles en local
