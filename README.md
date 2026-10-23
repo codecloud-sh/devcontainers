@@ -45,7 +45,7 @@ defaults:
 ## Contenu du devcontainer
 
 - Image Debian slim, utilisateur non root avec sudo et zsh.
-- Accès au Docker/Podman de l'hôte depuis le conteneur (feature docker-outside-of-docker) et `KAMAL_REGISTRY_PASSWORD`, pour Kamal.
+- Accès au Docker/Podman de l'hôte depuis le conteneur (feature docker-outside-of-docker).
 - mise installé dans l'image par la feature `devcontainers-extra/features/mise` (`/usr/local/bin/mise`). Il installe Ruby et Node à partir de `.ruby-version` et `.node-version`.
 - Ruby, Node et les gems (le dossier de mise) dans un volume nommé, `<slug>_mise-data` : une reconstruction du conteneur ne les réinstalle pas. Pour repartir de zéro, par exemple après une montée de version de Debian dans l'image : `podman volume rm <slug>_mise-data` (ou `docker volume rm`).
 - À la création du conteneur (`post-create.sh`) : dotfiles chezmoi, `gh auth login`, `mise install`, plugins Claude Code (ruby-lsp, superpowers, superpowers-ruby, caveman), puis `bin/setup --skip-server` s'il existe.
