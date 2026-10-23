@@ -30,6 +30,6 @@ USER $USERNAME
 
 ENV PATH="$HOME/.local/bin:$PATH"
 
-# Mount point of the mise-data volume (compose.yaml), created here so that
-# the volume belongs to the user and not to root.
-RUN mkdir -p $HOME/.local/share/mise
+# Mount points of the mise-data and gh-config volumes (compose.yaml), created
+# here so that the volumes belong to the user and not to root.
+RUN mkdir -p $HOME/.local/share/mise $HOME/.config/gh

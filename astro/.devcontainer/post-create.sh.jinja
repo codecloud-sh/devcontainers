@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-# tmp/ holds the Claude Code and gh configuration, tokens included. Astro's
+# tmp/ holds the Claude Code configuration, tokens included. Astro's
 # .gitignore doesn't cover it: tmp/.gitignore keeps the whole folder out of Git.
 mkdir -p tmp
 [ -e tmp/.gitignore ] || echo '*' > tmp/.gitignore
@@ -20,6 +20,8 @@ echo
 echo "================="
 echo "Github login"
 echo "================="
+# gh config lives in the devcontainers-gh volume, shared by every project of this
+# machine: only the first container (or a revoked token) asks to log in.
 (
   gh auth status >/dev/null 2>&1 || gh auth login
 )
