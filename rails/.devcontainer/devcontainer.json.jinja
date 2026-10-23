@@ -51,11 +51,6 @@
   // Ports du conteneur accessibles en local
   "forwardPorts": [
     3000, // Rails
-{%- if database == "postgresql" %}
-    5432, // PostgreSQL
-{%- elif database == "mysql" %}
-    3306, // MySQL
-{%- endif %}
 {%- if redis %}
     6379, // Redis
 {%- endif %}
