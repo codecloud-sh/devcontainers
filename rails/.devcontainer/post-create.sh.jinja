@@ -20,6 +20,31 @@ echo "================="
 )
 echo
 echo "================="
+echo "Ruby version"
+echo "================="
+# New project (neither .ruby-version nor Gemfile): offer the latest stable Ruby,
+# so that mise install has a Ruby to install. Without a terminal, create it.
+if [ ! -e .ruby-version ] && [ ! -e Gemfile ]; then
+  latest=$(mise latest ruby 2>/dev/null || true)
+  if ! printf '%s' "$latest" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+    echo "=> Latest stable Ruby not found, no .ruby-version created."
+  else
+    answer=y
+    if [ -t 0 ]; then
+      printf 'No .ruby-version: create it with Ruby %s (latest stable)? [Y/n] ' "$latest"
+      read -r answer || answer=y
+    fi
+    case "$answer" in
+      [nN]*) echo "=> No .ruby-version created." ;;
+      *) echo "$latest" > .ruby-version && echo "=> .ruby-version created: $latest" ;;
+    esac
+  fi
+else
+  echo "=> Ruby version already set by the project."
+fi
+
+echo
+echo "================="
 echo "mise install"
 echo "================="
 mise install
