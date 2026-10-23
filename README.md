@@ -32,7 +32,7 @@ Copier réapplique les changements du template en gardant les modifications fait
 | `username` | `dev` | Utilisateur créé dans le conteneur |
 | `database` | SQLite | Feature client, service compose et `DB_HOST` pour PostgreSQL ou MySQL (plus `DB_USER` et `DB_PASSWORD` pour PostgreSQL) |
 | `redis` | non | Service Valkey et `REDIS_URL` |
-| `system_tests` | oui | Service Selenium, `SELENIUM_HOST` et `CAPYBARA_SERVER_PORT` |
+| `system_tests` | oui | Service Selenium (jusqu'à 4 navigateurs en parallèle, 2 Go de `/dev/shm`), `SELENIUM_HOST` et `CAPYBARA_SERVER_PORT` |
 
 Pour ne pas retaper les mêmes réponses, Copier lit des valeurs par défaut dans `~/.config/copier/settings.yml` sous Linux (ou dans le fichier indiqué par `COPIER_SETTINGS_PATH`) :
 
