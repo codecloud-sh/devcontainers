@@ -1,0 +1,83 @@
+// Généré avec nicolascochin/devcontainers (Copier). Pour le mettre à jour :
+//   uvx copier update -a .devcontainer/.copier-answers.yml
+// Format : https://containers.dev/implementors/json_reference/
+{
+  "name": "{{ project_name }}",
+  "dockerComposeFile": "compose.yaml",
+  "service": "rails-app",
+  "workspaceFolder": "/workspaces/{{ project_slug }}",
+  // Features : https://containers.dev/features
+  "features": {
+    // Dernière version de gh (option "version" à "latest" par défaut) : nécessaire pour `gh pr create --attach`
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers-extra/features/mise:1": {},
+    "ghcr.io/rails/devcontainer/features/activestorage": {},
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "moby": false
+    },
+{%- if database == "sqlite3" %}
+    "ghcr.io/rails/devcontainer/features/sqlite3": {},
+{%- elif database == "postgresql" %}
+    "ghcr.io/rails/devcontainer/features/postgres-client": {},
+{%- elif database == "mysql" %}
+    "ghcr.io/rails/devcontainer/features/mysql-client": {},
+{%- endif %}
+    "ghcr.io/jsburckhardt/devcontainer-features/rtk:1": {}
+  },
+  "containerEnv": {
+    "MISE_IDIOMATIC_VERSION_FILE_ENABLE_TOOLS": "ruby,node,bun",
+    "BINDING": "0.0.0.0", // rails server écoute sur toutes les interfaces du conteneur
+{%- if system_tests %}
+    "CAPYBARA_SERVER_PORT": "45678",
+    "SELENIUM_HOST": "selenium",
+{%- endif %}
+    // "KAMAL_REGISTRY_PASSWORD": "$KAMAL_REGISTRY_PASSWORD",
+{%- if database == "postgresql" %}
+    "DB_HOST": "postgres",
+    "DB_USER": "postgres",
+    "DB_PASSWORD": "postgres",
+{%- elif database == "mysql" %}
+    "DB_HOST": "mysql",
+{%- endif %}
+{%- if redis %}
+    "REDIS_URL": "redis://redis:6379/1",
+{%- endif %}
+    "VISUAL": "code --wait",
+    "CLAUDE_CONFIG_DIR": "${containerWorkspaceFolder}/tmp/claude",
+    "GH_CONFIG_DIR": "${containerWorkspaceFolder}/tmp/gh",
+    "GIT_EMAIL": "${localEnv:GIT_EMAIL}",
+    "CAVEMAN_DEFAULT_MODE": "full"
+  },
+  // Ports du conteneur accessibles en local
+  "forwardPorts": [
+    3000, // Rails
+    8592 // Serveur de dev Herb (barre d'outils ReActionView)
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "shopify.ruby-lsp",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "eamodio.gitlens",
+        "github.vscode-pull-request-github",
+        "bradlc.vscode-tailwindcss",
+        "Anthropic.claude-code",
+        "marcoroth.herb-lsp",
+        "shanehofstetter.rails-i18n"
+      ],
+      "settings": {
+        "rubyLsp.rubyVersionManager": {
+          "miseExecutablePath": "/usr/local/bin/mise",
+          "identifier": "auto"
+        },
+        "git.detectWorktrees": true,
+        "git.worktreeIncludeFiles": [
+          "config/master.key",
+          ".env*"
+        ]
+      }
+    }
+  },
+  "postCreateCommand": ".devcontainer/post-create.sh"
+}
