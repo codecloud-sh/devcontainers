@@ -28,8 +28,8 @@
     "MISE_IDIOMATIC_VERSION_FILE_ENABLE_TOOLS": "ruby,node",
     "BINDING": "0.0.0.0", // rails server écoute sur toutes les interfaces du conteneur
 {%- if system_tests %}
-    "SELENIUM_URL": "http://selenium:4444",
-    "CAPYBARA_APP_HOST": "rails-app",
+    "CAPYBARA_SERVER_PORT": "45678",
+    "SELENIUM_HOST": "selenium",
 {%- endif %}
 {%- if kamal %}
     "KAMAL_REGISTRY_PASSWORD": "$KAMAL_REGISTRY_PASSWORD",

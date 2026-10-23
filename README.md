@@ -33,7 +33,7 @@ Copier réapplique les changements du template en gardant les modifications fait
 | `git_email` | vide | Email Git passé aux dotfiles. Vide : chezmoi le demande à la création du conteneur |
 | `database` | SQLite | Feature client, service compose et `DB_HOST` pour PostgreSQL ou MySQL (plus `DB_USER` et `DB_PASSWORD` pour PostgreSQL) |
 | `redis` | non | Service Valkey et `REDIS_URL` |
-| `system_tests` | oui | Service Selenium, `SELENIUM_URL` et `CAPYBARA_APP_HOST` |
+| `system_tests` | oui | Service Selenium, `SELENIUM_HOST` et `CAPYBARA_SERVER_PORT` |
 | `kamal` | oui | `KAMAL_REGISTRY_PASSWORD` passé au conteneur |
 
 Pour ne pas retaper les mêmes réponses, Copier lit des valeurs par défaut dans `~/.config/copier/settings.yml` sous Linux (ou dans le fichier indiqué par `COPIER_SETTINGS_PATH`) :
@@ -58,7 +58,6 @@ defaults:
 - `GIT_EMAIL` défini dans l'environnement de l'hôte : il est passé au conteneur (`${localEnv:GIT_EMAIL}`) et lu par les dotfiles. Sinon, chezmoi demande l'email à la création du conteneur.
 - Avec Podman rootless : `userns = "keep-id"` dans `containers.conf` et le wrapper `getenforce` de mes dotfiles. Le template lui-même ne contient rien de propre à Podman.
 - Avec PostgreSQL : `config/database.yml` doit lire `DB_HOST`, `DB_USER` et `DB_PASSWORD`. Avec MySQL : `DB_HOST`.
-- Avec les tests système : `test/application_system_test_case.rb` doit lire `SELENIUM_URL` (navigateur distant) et `CAPYBARA_APP_HOST` (hôte du serveur de test).
 
 ## Faire évoluer le template
 
