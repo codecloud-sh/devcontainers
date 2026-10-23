@@ -1,5 +1,5 @@
 # Template Copier pour générer le dossier .devcontainer d'un projet.
-# Chaque stack a son dossier (rails/, ...), choisi par la question `stack`.
+# Chaque stack a son dossier (rails/, astro/), choisi par la question `stack`.
 # Pour en ajouter une : créer son dossier, l'ajouter aux choix de `stack`
 # et conditionner ses questions propres avec `when`.
 
@@ -17,6 +17,7 @@ stack:
   help: Stack du projet
   choices:
     Ruby on Rails: rails
+    Astro: astro
   default: rails
 
 project_name:
@@ -26,7 +27,7 @@ project_name:
 
 project_slug:
   type: str
-  help: Identifiant court (projet compose, hostname et dossier /workspaces/<slug> dans le conteneur)
+  help: Identifiant court (hostname du conteneur et préfixe des volumes ; pour Rails, aussi projet compose et dossier /workspaces/<slug>)
   default: "{{ project_name | lower | regex_replace('[^a-z0-9]+', '-') | trim('-') }}"
   validator: >-
     {% if not (project_slug | regex_search('^[a-z0-9][a-z0-9-]*$')) %}
