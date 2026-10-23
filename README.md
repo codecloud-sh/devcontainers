@@ -33,7 +33,6 @@ Copier réapplique les changements du template en gardant les modifications fait
 | `database` | Rails | SQLite | Feature client, service compose et `DB_HOST` pour PostgreSQL ou MySQL (plus `DB_USER` et `DB_PASSWORD` pour PostgreSQL) |
 | `redis` | Rails | non | Service Valkey et `REDIS_URL` |
 | `system_tests` | Rails | oui | Service Selenium (jusqu'à 4 navigateurs en parallèle, 2 Go de `/dev/shm`), `SELENIUM_HOST` et `CAPYBARA_SERVER_PORT` |
-| `netlify` | Astro | oui | Serveur MCP Netlify pour Claude Code |
 
 Pour ne pas retaper les mêmes réponses, Copier lit des valeurs par défaut dans `~/.config/copier/settings.yml` sous Linux (ou dans le fichier indiqué par `COPIER_SETTINGS_PATH`) :
 
@@ -66,7 +65,7 @@ defaults:
 
 - Un seul conteneur, sans compose.
 - Nouveau projet (ni `.node-version`, `.nvmrc`, `.bun-version` ni `package.json`) : `.node-version` proposé avec la dernière version LTS de Node.
-- Plugin Claude Code `codecloud-core`, serveur MCP de la doc Astro, et celui de Netlify selon la réponse à `netlify`.
+- Plugin Claude Code `codecloud-core` et serveur MCP de la doc Astro.
 - Installation du projet selon le fichier de verrouillage : `bun install` (`bun.lock`), `npm ci` (`package-lock.json`) ou `npm install`.
 - `tmp/.gitignore` créé s'il manque : le `.gitignore` d'Astro ne couvre pas `tmp/`, qui contient les jetons de `gh` et de Claude Code.
 - Port redirigé : 4321 (serveur de dev Astro).
@@ -80,7 +79,7 @@ defaults:
 
 ## Faire évoluer le template
 
-Les fichiers de chaque stack sont dans son dossier (`rails/`, `astro/`), les questions dans `copier.yml`. Les questions propres à une stack ont une condition `when` sur `stack` : `database`, `redis` et `system_tests` ne sont posées que pour Rails, `netlify` que pour Astro.
+Les fichiers de chaque stack sont dans son dossier (`rails/`, `astro/`), les questions dans `copier.yml`. Les questions propres à une stack ont une condition `when` sur `stack` : `database`, `redis` et `system_tests` ne sont posées que pour Rails.
 
 Pour ajouter une stack : créer son dossier avec un `.devcontainer/` et le fichier `{{ _copier_conf.answers_file }}.jinja`, l'ajouter aux choix de `stack` et conditionner ses questions propres.
 

@@ -83,10 +83,6 @@ claude plugin install caveman@caveman --scope project --yes
 
 claude mcp get astro-docs >/dev/null 2>&1 \
   || claude mcp add --transport http astro-docs https://mcp.docs.astro.build/mcp
-{%- if netlify %}
-claude mcp get netlify >/dev/null 2>&1 \
-  || claude mcp add --transport http netlify https://netlify-mcp.netlify.app/mcp
-{%- endif %}
 echo "=> Claude plugins and MCP servers installation completed."
 
 echo

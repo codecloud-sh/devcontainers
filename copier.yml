@@ -64,9 +64,3 @@ system_tests:
   when: "{{ stack == 'rails' }}"
   help: Tests système avec Selenium (Chromium dans un conteneur à part) ?
   default: true
-
-netlify:
-  type: bool
-  when: "{{ stack == 'astro' }}"
-  help: Déploiement sur Netlify (serveur MCP Netlify pour Claude Code) ?
-  default: true
