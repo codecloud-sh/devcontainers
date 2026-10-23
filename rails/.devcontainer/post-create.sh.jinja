@@ -28,6 +28,19 @@ echo "=> mise install completed."
 
 echo
 echo "================="
+echo "Claude settings..."
+echo "================="
+# User settings of Claude Code in the container (CLAUDE_CONFIG_DIR, under tmp/):
+# no attribution in commits and pull requests. Merged, other settings are kept.
+settings="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/settings.json"
+mkdir -p "$(dirname "$settings")"
+[ -s "$settings" ] || echo '{}' > "$settings"
+jq '.attribution = {"commit": "", "pr": "", "sessionUrl": false}' "$settings" > "$settings.tmp" \
+  && mv "$settings.tmp" "$settings"
+echo "=> Claude settings updated."
+
+echo
+echo "================="
 echo "Install claude plugins..."
 echo "================="
 claude plugin marketplace add anthropics/claude-plugins-official || true

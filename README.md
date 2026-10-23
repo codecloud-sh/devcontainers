@@ -49,6 +49,7 @@ defaults:
 - Ruby, Node ou Bun et les gems (le dossier de mise) dans un volume nommé, `<slug>_mise-data` : une reconstruction du conteneur ne les réinstalle pas. Pour repartir de zéro, par exemple après une montée de version de Debian dans l'image : `podman volume rm <slug>_mise-data` (ou `docker volume rm`).
 - À la création du conteneur (`post-create.sh`) : dotfiles chezmoi, `gh auth login`, `mise install`, plugins Claude Code (`stack-rails` du marketplace `codecloud-sh/claude-plugins`, qui tire `codecloud-core` et `superpowers-ruby`, et caveman), puis `bin/setup --skip-server` s'il existe.
 - Configuration de Claude Code et de `gh` dans le `tmp/` du projet : elle survit à une reconstruction du conteneur.
+- Réglages utilisateur de Claude Code (`tmp/claude/settings.json`) : pas d'attribution dans les commits et les PR. `post-create.sh` les fusionne avec les réglages existants.
 - Extensions VS Code pour Rails : Ruby LSP, Herb, Tailwind, i18n, GitLens, etc.
 
 ## Pré-requis côté hôte
