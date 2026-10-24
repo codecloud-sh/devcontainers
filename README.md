@@ -35,6 +35,7 @@ Les projets générés quand le repo s'appelait `nicolascochin/devcontainers` ga
 | `database` | Rails | SQLite | Feature client, service compose et `DB_HOST` pour PostgreSQL ou MySQL (plus `DB_USER` et `DB_PASSWORD` pour PostgreSQL) |
 | `redis` | Rails | non | Service Valkey et `REDIS_URL` |
 | `system_tests` | Rails | oui | Service Selenium (jusqu'à 4 navigateurs en parallèle, 2 Go de `/dev/shm`), `SELENIUM_HOST` et `CAPYBARA_SERVER_PORT` |
+| `gotenberg` | Rails | non | Service Gotenberg (PDF à partir de pages HTML) et `GOTENBERG_URL` |
 
 Pour ne pas retaper les mêmes réponses, Copier lit des valeurs par défaut dans `~/.config/copier/settings.yml` sous Linux (ou dans le fichier indiqué par `COPIER_SETTINGS_PATH`) :
 
@@ -57,7 +58,7 @@ defaults:
 
 ## Ruby on Rails
 
-- Services compose selon les réponses : Selenium, PostgreSQL ou MySQL, Redis. Leurs ports ne sont pas exposés : l'app les joint par le réseau compose.
+- Services compose selon les réponses : Selenium, PostgreSQL ou MySQL, Redis, Gotenberg. Leurs ports ne sont pas exposés : l'app les joint par le réseau compose.
 - Accès au Docker/Podman de l'hôte depuis le conteneur (feature docker-outside-of-docker).
 - Nouveau projet (ni `.ruby-version` ni `Gemfile`) : `.ruby-version` proposé avec la dernière version stable de Ruby.
 - Plugins Claude Code `stack-rails`, qui tire `codecloud-core` et `superpowers-ruby`, et `ruby-lsp` du marketplace officiel.
@@ -87,7 +88,7 @@ defaults:
 
 ## Faire évoluer le template
 
-Les fichiers de chaque stack sont dans son dossier (`rails/`, `astro/`), les questions dans `copier.yml`. Les questions propres à une stack ont une condition `when` sur `stack` : `database`, `redis` et `system_tests` ne sont posées que pour Rails.
+Les fichiers de chaque stack sont dans son dossier (`rails/`, `astro/`), les questions dans `copier.yml`. Les questions propres à une stack ont une condition `when` sur `stack` : `database`, `redis`, `system_tests` et `gotenberg` ne sont posées que pour Rails.
 
 Pour ajouter une stack : créer son dossier avec un `.devcontainer/` et le fichier `{{ _copier_conf.answers_file }}.jinja`, l'ajouter aux choix de `stack` et conditionner ses questions propres.
 
