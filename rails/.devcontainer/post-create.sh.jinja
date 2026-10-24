@@ -87,6 +87,20 @@ echo "=> Claude settings updated."
 
 echo
 echo "================="
+echo "rtk init..."
+echo "================="
+# Global Claude Code hook of rtk (installed by its devcontainer feature), written in
+# CLAUDE_CONFIG_DIR next to the settings above. --auto-patch patches settings.json
+# without asking. RTK_TELEMETRY_DISABLED=1 skips the telemetry prompt, which can hang
+# without a human to answer it: no consent is recorded, so telemetry stays off.
+if RTK_TELEMETRY_DISABLED=1 rtk init -g --auto-patch; then
+  echo "=> rtk initialized."
+else
+  echo "=> rtk not initialized."
+fi
+
+echo
+echo "================="
 echo "Install claude plugins..."
 echo "================="
 claude plugin marketplace add anthropics/claude-plugins-official || true
