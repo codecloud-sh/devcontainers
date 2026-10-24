@@ -67,6 +67,22 @@ echo "=> mise install completed."
 
 echo
 echo "================="
+echo "Node for Claude hooks"
+echo "================="
+# The caveman hooks run with node and quietly do nothing without it: caveman then
+# starts only on /caveman. Project without Node (Rails with importmap, Bun only):
+# latest Node LTS, pinned, as mise's global fallback, kept in the mise-data volume.
+# The project's own Node version still wins wherever it sets one.
+if node --version >/dev/null 2>&1; then
+  echo "=> Node already provided by the project."
+elif mise use -g --pin node@lts; then
+  echo "=> Node $(node --version) installed as global fallback."
+else
+  echo "=> Node not installed: caveman starts only with /caveman."
+fi
+
+echo
+echo "================="
 echo "Claude settings..."
 echo "================="
 # User settings of Claude Code in the container (CLAUDE_CONFIG_DIR, under tmp/):
