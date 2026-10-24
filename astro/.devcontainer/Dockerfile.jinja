@@ -29,7 +29,10 @@ ENV HOME=/home/$USERNAME
 
 USER $USERNAME
 
-ENV PATH="$HOME/.local/bin:$PATH"
+# mise shims: processes started without an interactive shell (Claude Code, VS Code
+# tasks, hooks) get the tool versions of the project. Interactive zsh still runs
+# `mise activate` through the oh-my-zsh plugin.
+ENV PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"
 
 # Mount points of the mise-data, playwright-browsers and devcontainers-gh volumes
 # (devcontainer.json), created here so that the volumes belong to the user and not to root.
