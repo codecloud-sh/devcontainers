@@ -26,6 +26,9 @@
   },
   "containerEnv": {
     "MISE_IDIOMATIC_VERSION_FILE_ENABLE_TOOLS": "ruby,node,bun",
+    // État de mise dans le volume de ses installations : sinon perdu à la reconstruction,
+    // et une installation interrompue passe pour terminée
+    "MISE_STATE_DIR": "/home/{{ username }}/.local/share/mise/state",
     "BINDING": "0.0.0.0", // rails server écoute sur toutes les interfaces du conteneur
 {%- if system_tests %}
     "CAPYBARA_SERVER_PORT": "45678",
