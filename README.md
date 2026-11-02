@@ -34,7 +34,7 @@ Les projets générés quand le repo s'appelait `nicolascochin/devcontainers` ga
 | `username` | toutes | `dev` | Utilisateur créé dans le conteneur |
 | `database` | Rails | SQLite | Feature client, service compose et `DB_HOST` pour PostgreSQL ou MySQL (plus `DB_USER` et `DB_PASSWORD` pour PostgreSQL) |
 | `redis` | Rails | non | Service Valkey et `REDIS_URL` |
-| `system_tests` | Rails | oui | Service Selenium (autant de navigateurs en parallèle que de processeurs, 4 Go de `/dev/shm`), `SELENIUM_HOST` et `CAPYBARA_SERVER_PORT` (30000, sous la plage des ports éphémères) |
+| `system_tests` | Rails | oui | Service Selenium (autant de navigateurs en parallèle que de processeurs, 4 Go de `/dev/shm`, sans limite de tâches), `SELENIUM_HOST` et `CAPYBARA_SERVER_PORT` (30000, sous la plage des ports éphémères) |
 
 Pour ne pas retaper les mêmes réponses, Copier lit des valeurs par défaut dans `~/.config/copier/settings.yml` sous Linux (ou dans le fichier indiqué par `COPIER_SETTINGS_PATH`) :
 
