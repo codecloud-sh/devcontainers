@@ -40,11 +40,12 @@ services:
     image: selenium/standalone-chromium
     restart: unless-stopped
     environment:
-      # Jusqu'à 4 navigateurs en parallèle (1 par défaut), même avec moins de processeurs
-      SE_NODE_MAX_SESSIONS: '4'
-      SE_NODE_OVERRIDE_MAX_SESSIONS: 'true'
-    # /dev/shm fait 64 Mo par défaut : trop peu pour Chrome
-    shm_size: 2gb
+      # Autant de navigateurs en parallèle que de processeurs (1 par défaut) : sans l'override,
+      # Selenium plafonne SE_NODE_MAX_SESSIONS au nombre de processeurs de la machine
+      SE_NODE_MAX_SESSIONS: '64'
+      SE_NODE_OVERRIDE_MAX_SESSIONS: 'false'
+    # /dev/shm fait 64 Mo par défaut : trop peu pour Chrome, et partagé par tous les navigateurs
+    shm_size: 4gb
 {%- endif %}
 {%- if redis %}
 
