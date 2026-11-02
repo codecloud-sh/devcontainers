@@ -46,6 +46,9 @@ services:
       SE_NODE_OVERRIDE_MAX_SESSIONS: 'false'
     # /dev/shm fait 64 Mo par défaut : trop peu pour Chrome, et partagé par tous les navigateurs
     shm_size: 4gb
+    # Podman limite un conteneur à 2048 tâches, threads compris : un Chrome en prend environ 150,
+    # et au-delà de 13 navigateurs les suivants ne démarrent plus
+    pids_limit: -1
 {%- endif %}
 {%- if redis %}
 
