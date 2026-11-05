@@ -18,11 +18,6 @@
     // État de mise dans le volume de ses installations : sinon perdu à la reconstruction,
     // et une installation interrompue passe pour terminée
     "MISE_STATE_DIR": "/home/{{ username }}/.local/share/mise/state",
-    // Service postgres de compose.yaml. Ces variables priment sur un éventuel .env du projet
-    "DATABASE_URL": "postgres://payload:payload@postgres:5432/payload",
-    "PAYLOAD_SECRET": "secret-de-developpement",
-    "SERVER_URL": "http://localhost:3000",
-    "NEXT_TELEMETRY_DISABLED": "1",
     "VISUAL": "code --wait",
     "CLAUDE_CONFIG_DIR": "${containerWorkspaceFolder}/tmp/claude",
     "GIT_EMAIL": "${localEnv:GIT_EMAIL}",
@@ -30,11 +25,11 @@
   },
   // Ports du conteneur accessibles en local
   "forwardPorts": [
-    3000 // Administration Payload
+    3000 // Serveur de dev de l'application
   ],
   "portsAttributes": {
     "3000": {
-      "label": "Payload",
+      "label": "Application",
       "onAutoForward": "notify"
     }
   },
@@ -43,8 +38,6 @@
       "extensions": [
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
-        // Composants .astro du package de blocs
-        "astro-build.astro-vscode",
         "eamodio.gitlens",
         "github.vscode-pull-request-github",
         "Anthropic.claude-code",

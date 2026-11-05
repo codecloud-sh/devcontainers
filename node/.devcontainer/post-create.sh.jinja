@@ -6,8 +6,8 @@ set -e
 # refuses to load its completions ("Insecure completion-dependent directories").
 umask 022
 
-# tmp/ holds the Claude Code configuration, tokens included. Payload's
-# .gitignore doesn't cover it: tmp/.gitignore keeps the whole folder out of Git.
+# tmp/ holds the Claude Code configuration, tokens included. A project's .gitignore
+# may not cover it: tmp/.gitignore keeps the whole folder out of Git.
 mkdir -p tmp
 [ -e tmp/.gitignore ] || echo '*' > tmp/.gitignore
 
