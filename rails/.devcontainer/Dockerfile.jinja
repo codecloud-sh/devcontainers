@@ -7,7 +7,7 @@ ARG USER_UID=1000
 # - sudo, zsh, curl, ca-certificates, jq: user environment and dotfiles
 #   (ca-certificates is only a recommendation of curl, skipped by --no-install-recommends)
 # - git, openssh-client: Git
-# - libatomic1: required by the official Node binaries since Node 26, installed by mise
+# - libatomic1: required by the official Node 26 binaries, installed by mise
 # - build-essential, libffi-dev (fiddle), libyaml-dev (psych), zlib1g-dev (zlib):
 #   native gem extensions. Ruby itself is installed by mise in post-create.sh,
 #   from a precompiled build when one exists.
