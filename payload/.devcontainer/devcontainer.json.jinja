@@ -1,0 +1,65 @@
+// Généré avec codecloud-sh/devcontainers (Copier). Pour le mettre à jour :
+//   uvx copier update -a .devcontainer/.copier-answers.yml
+// Format : https://containers.dev/implementors/json_reference/
+{
+  "name": "{{ project_name }}",
+  "dockerComposeFile": "compose.yaml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/{{ project_slug }}",
+  // Features : https://containers.dev/features
+  "features": {
+    // Dernière version de gh (option "version" à "latest" par défaut) : nécessaire pour `gh pr create --attach`
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers-extra/features/mise:1": {},
+    "ghcr.io/jsburckhardt/devcontainer-features/rtk:1": {}
+  },
+  "containerEnv": {
+    "MISE_IDIOMATIC_VERSION_FILE_ENABLE_TOOLS": "node,bun",
+    // État de mise dans le volume de ses installations : sinon perdu à la reconstruction,
+    // et une installation interrompue passe pour terminée
+    "MISE_STATE_DIR": "/home/{{ username }}/.local/share/mise/state",
+    // Service postgres de compose.yaml. Ces variables priment sur un éventuel .env du projet
+    "DATABASE_URL": "postgres://payload:payload@postgres:5432/payload",
+    "PAYLOAD_SECRET": "secret-de-developpement",
+    "SERVER_URL": "http://localhost:3000",
+    "NEXT_TELEMETRY_DISABLED": "1",
+    "VISUAL": "code --wait",
+    "CLAUDE_CONFIG_DIR": "${containerWorkspaceFolder}/tmp/claude",
+    "GIT_EMAIL": "${localEnv:GIT_EMAIL}",
+    "CAVEMAN_DEFAULT_MODE": "full"
+  },
+  // Ports du conteneur accessibles en local
+  "forwardPorts": [
+    3000 // Administration Payload
+  ],
+  "portsAttributes": {
+    "3000": {
+      "label": "Payload",
+      "onAutoForward": "notify"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        // Composants .astro du package de blocs
+        "astro-build.astro-vscode",
+        "eamodio.gitlens",
+        "github.vscode-pull-request-github",
+        "Anthropic.claude-code",
+        "oderwat.indent-rainbow"
+      ],
+      "settings": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "[astro]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        }
+      }
+    }
+  },
+  "postCreateCommand": ".devcontainer/post-create.sh",
+  // À chaque démarrage : met à jour les plugins Claude Code du marketplace codecloud
+  "postStartCommand": ".devcontainer/post-start.sh"
+}
