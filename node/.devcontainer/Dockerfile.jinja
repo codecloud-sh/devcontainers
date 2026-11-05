@@ -1,0 +1,45 @@
+FROM debian:stable-slim
+ARG USERNAME={{ username }}
+ARG USER_GID=1000
+ARG USER_UID=1000
+
+# System packages
+# - sudo, zsh, curl, ca-certificates, jq: user environment, dotfiles and post-create.sh
+#   (ca-certificates is only a recommendation of curl, skipped by --no-install-recommends)
+# - git, openssh-client: Git
+{% if postgres -%}
+# - postgresql-client: psql, to look into the database of the compose service
+{% endif -%}
+# Node or Bun is installed by mise in post-create.sh.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    sudo zsh curl ca-certificates jq \
+    git openssh-client \
+{%- if postgres %}
+    postgresql-client \
+{%- endif %}
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
+# Non-root user with passwordless sudo
+RUN groupadd --gid $USER_GID $USERNAME \
+  && useradd --uid $USER_UID --gid $USER_GID -m -s /bin/zsh $USERNAME \
+  && echo "$USERNAME ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME \
+  && chmod 0440 /etc/sudoers.d/$USERNAME
+
+# Usual umask in every zsh shell (terminals), even when the container exec
+# starts them with umask 0000
+RUN echo 'umask 022' >> /etc/zsh/zshenv
+
+ENV HOME=/home/$USERNAME
+
+USER $USERNAME
+
+# mise shims: processes started without an interactive shell (Claude Code, VS Code
+# tasks, hooks) get the tool versions of the project. Interactive zsh still runs
+# `mise activate` through the oh-my-zsh plugin.
+ENV PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"
+
+# Mount points of the mise-data, playwright-browsers and gh-config volumes
+# (compose.yaml), created here so that the volumes belong to the user and not to root.
+RUN mkdir -p $HOME/.local/share/mise $HOME/.cache/ms-playwright $HOME/.config/gh

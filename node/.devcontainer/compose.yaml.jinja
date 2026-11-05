@@ -1,0 +1,48 @@
+name: "{{ project_slug }}"
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    hostname: {{ project_slug }}
+
+    volumes:
+    - ..:/workspaces/{{ project_slug }}:cached
+    # Node ou Bun et paquets globaux installés par mise : gardés d'une reconstruction à l'autre
+    - mise-data:/home/{{ username }}/.local/share/mise
+    # Navigateurs de Playwright (Chromium) : pas retéléchargés à chaque reconstruction
+    - playwright-browsers:/home/{{ username }}/.cache/ms-playwright
+    # Connexion de gh : un seul jeton par machine, partagé par tous les projets
+    - gh-config:/home/{{ username }}/.config/gh
+
+    # Garde le conteneur en vie quand aucun processus ne tourne
+    command: sleep infinity
+    # PID 1 qui transmet les signaux (arrêt immédiat) et récolte les processus zombies
+    init: true
+
+    # Pour exposer un port, utiliser "forwardPorts" dans devcontainer.json
+{%- if postgres %}
+    depends_on:
+    - postgres
+
+  postgres:
+    image: postgres:18
+    restart: unless-stopped
+    volumes:
+    - postgres-data:/var/lib/postgresql
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+{%- endif %}
+
+volumes:
+  mise-data:
+  playwright-browsers:
+{%- if postgres %}
+  postgres-data:
+{%- endif %}
+  # Nom fixe, sans le préfixe du projet compose : le même volume pour tous les
+  # projets de la machine, quelle que soit leur stack
+  gh-config:
+    name: devcontainers-gh
