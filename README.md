@@ -87,6 +87,7 @@ defaults:
 Le squelette commun des projets Node, quel que soit leur framework : ce qui est propre à un projet (variables d'environnement, extensions VS Code, ports) s'ajoute dans le projet.
 
 - Services compose : l'application et, en option, PostgreSQL 18, dont le port n'est pas exposé. L'application le joint par le réseau compose.
+- `label=disable` sur le service de l'application : sans lui, le workspace est illisible sous SELinux.
 - Aucune variable d'environnement générée. Avec PostgreSQL, l'adresse à mettre dans le `.env` du projet est `postgres://postgres:postgres@postgres:5432/postgres`.
 - Nouveau projet (ni `.node-version`, `.nvmrc`, `.bun-version` ni `package.json`) : `.node-version` proposé avec la dernière version LTS de Node. Un projet existant sans fichier de version utilise la dernière LTS installée par mise : ajouter un `.node-version` pour suivre la version de production.
 - Plugin Claude Code `codecloud-core`, mis à jour à chaque démarrage et en arrière-plan pendant les sessions.
