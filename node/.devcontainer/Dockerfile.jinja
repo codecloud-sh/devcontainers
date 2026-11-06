@@ -7,6 +7,7 @@ ARG USER_UID=1000
 # - sudo, zsh, curl, ca-certificates, jq: user environment, dotfiles and post-create.sh
 #   (ca-certificates is only a recommendation of curl, skipped by --no-install-recommends)
 # - git, openssh-client: Git
+# - libatomic1: required by the official Node 26 binaries, installed by mise
 {% if postgres -%}
 # - postgresql-client: psql, to look into the database of the compose service
 {% endif -%}
@@ -15,6 +16,7 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends \
     sudo zsh curl ca-certificates jq \
     git openssh-client \
+    libatomic1 \
 {%- if postgres %}
     postgresql-client \
 {%- endif %}
