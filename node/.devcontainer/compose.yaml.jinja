@@ -20,6 +20,10 @@ services:
     command: sleep infinity
     # PID 1 qui transmet les signaux (arrêt immédiat) et récolte les processus zombies
     init: true
+    # Sous SELinux, le workspace serait illisible dans le conteneur (Permission denied). Rails
+    # l'obtient par la feature docker-outside-of-docker, Astro par le CLI, sans compose.
+    security_opt:
+    - label=disable
 
     # Pour exposer un port, utiliser "forwardPorts" dans devcontainer.json
 {%- if postgres %}
