@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# Runs when the container is created (onCreateCommand), before VS Code connects: Python
+# and the project dependencies are ready when the Python extension starts. Otherwise it
+# finds no interpreter, or a .venv pointing to a Python not installed yet, and offers to
+# install one. Every step can be run again safely: .devcontainer/on-create.sh
+set -e
+
+# The container exec may run with umask 0000: without this, the .venv and everything
+# mise installs would be world-writable.
+umask 022
+
+echo
+echo "================="
+echo "Python version"
+echo "================="
+# New project (neither .python-version nor pyproject.toml): offer the latest stable
+# Python, so that mise install has a Python to install. Without a terminal, create it.
+latest=""
+if [ -e .python-version ]; then
+  echo "=> Python version already set by the project."
+elif [ -e pyproject.toml ]; then
+  echo "=> No .python-version: the project uses mise's global Python (below)."
+  echo "   To pin a version for the project: uv python pin <version>"
+else
+  latest=$(mise latest python 2>/dev/null || true)
+  if ! printf '%s' "$latest" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+    echo "=> Latest stable Python not found, no .python-version created."
+    latest=""
+  else
+    answer=y
+    if [ -t 0 ]; then
+      printf 'No .python-version: create it with Python %s (latest stable)? [Y/n] ' "$latest"
+      read -r answer || answer=y
+    fi
+    case "$answer" in
+      [nN]*) echo "=> No .python-version created." ;;
+      *) echo "$latest" > .python-version && echo "=> .python-version created: $latest" ;;
+    esac
+  fi
+fi
+
+echo
+echo "================="
+echo "Global Python"
+echo "================="
+# Python outside the project too: at startup, the Python Environments extension looks for
+# a global Python and offers to install one when it finds none. Same version as the
+# project; for a project without .python-version, the latest stable Python. In conf.d,
+# because ~/.config/mise/config.toml belongs to the dotfiles.
+if [ -s .python-version ]; then
+  version=$(head -n 1 .python-version | tr -d '[:space:]')
+else
+  version=${latest:-$(mise latest python 2>/dev/null || true)}
+fi
+if [ -n "$version" ]; then
+  mkdir -p ~/.config/mise/conf.d
+  printf '[tools]\npython = "%s"\n' "$version" > ~/.config/mise/conf.d/python.toml
+  echo "=> Global Python: $version"
+else
+  echo "=> No Python version found, no global Python."
+fi
+
+echo
+echo "================="
+echo "mise install"
+echo "================="
+mise install
+eval "$(mise env)" # Activate mise for this script so it finds the installed tools
+echo "=> mise install completed."
+
+echo
+echo "================="
+echo "Install project dependencies..."
+echo "================="
+# .venv in the project folder, built with mise's Python (UV_PYTHON_DOWNLOADS=never).
+# It points into the mise-data volume, so it survives a rebuild of the container.
+if [ -e pyproject.toml ]; then
+  uv sync
+else
+  echo "=> No pyproject.toml yet (project not created?), skipping."
+fi
+echo "on-create.sh completed."

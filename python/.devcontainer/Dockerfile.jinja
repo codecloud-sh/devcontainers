@@ -1,0 +1,49 @@
+FROM debian:stable-slim
+ARG USERNAME={{ username }}
+ARG USER_GID=1000
+ARG USER_UID=1000
+
+# System packages
+# - sudo, zsh, curl, ca-certificates, jq: user environment, dotfiles and the scripts of .devcontainer/
+#   (ca-certificates is only a recommendation of curl, skipped by --no-install-recommends)
+# - git, openssh-client: Git
+# - make: Makefile tasks, common in Python projects
+# - libatomic1: required by the official Node 26 binaries, installed by mise as the
+#   fallback Node of the Claude Code hooks (post-create.sh)
+# Python and uv are installed by mise in on-create.sh.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    sudo zsh curl ca-certificates jq \
+    git openssh-client \
+    make \
+    libatomic1 \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
+# uv (https://docs.astral.sh/uv/), latest version, installed by mise with Python
+# (on-create.sh). Declared in mise's system config: the global one
+# (~/.config/mise/config.toml) belongs to the dotfiles.
+RUN mkdir -p /etc/mise && printf '[tools]\nuv = "latest"\n' > /etc/mise/config.toml
+
+# Non-root user with passwordless sudo
+RUN groupadd --gid $USER_GID $USERNAME \
+  && useradd --uid $USER_UID --gid $USER_GID -m -s /bin/zsh $USERNAME \
+  && echo "$USERNAME ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME \
+  && chmod 0440 /etc/sudoers.d/$USERNAME
+
+# Usual umask in every zsh shell (terminals), even when the container exec
+# starts them with umask 0000
+RUN echo 'umask 022' >> /etc/zsh/zshenv
+
+ENV HOME=/home/$USERNAME
+
+USER $USERNAME
+
+# mise shims: processes started without an interactive shell (Claude Code, VS Code
+# tasks, hooks, the Python extension) get the tool versions of the project.
+# Interactive zsh still runs `mise activate` through the oh-my-zsh plugin.
+ENV PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"
+
+# Mount points of the mise-data and devcontainers-gh volumes (devcontainer.json),
+# created here so that the volumes belong to the user and not to root.
+RUN mkdir -p $HOME/.local/share/mise $HOME/.config/gh

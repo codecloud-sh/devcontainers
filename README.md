@@ -2,7 +2,7 @@
 
 Template [Copier](https://copier.readthedocs.io/) pour générer le dossier `.devcontainer` de mes projets.
 
-Stacks disponibles : **Ruby on Rails**, **Astro** et **Node** (une par dossier, choisie par la première question).
+Stacks disponibles : **Ruby on Rails**, **Astro**, **Node** et **Python** (une par dossier, choisie par la première question).
 
 ## Utilisation
 
@@ -28,7 +28,7 @@ Les projets générés quand le repo s'appelait `nicolascochin/devcontainers` ga
 
 | Question | Stack | Défaut | Effet |
 | --- | --- | --- | --- |
-| `stack` | toutes | Ruby on Rails | Dossier du template utilisé (`rails/`, `astro/` ou `node/`) |
+| `stack` | toutes | Ruby on Rails | Dossier du template utilisé (`rails/`, `astro/`, `node/` ou `python/`) |
 | `project_name` | toutes | nom du dossier | Nom du devcontainer dans VS Code |
 | `project_slug` | toutes | dérivé du nom | Hostname du conteneur et préfixe des volumes. Pour Rails et Node, aussi nom du projet compose et dossier de travail (`/workspaces/<slug>`) |
 | `username` | toutes | `dev` | Utilisateur créé dans le conteneur |
@@ -47,16 +47,16 @@ defaults:
 ## Contenu commun
 
 - Image Debian slim, utilisateur non root avec sudo et zsh.
-- mise installé dans l'image par la feature `devcontainers-extra/features/mise` (`/usr/local/bin/mise`). Il installe ce que le projet déclare : Ruby (`.ruby-version`), Node (`.node-version`) ou Bun (`.bun-version`). Avec Bun, le `.bun-version` est à créer soi-même : `bun --version > .bun-version`.
-- Ce qu'installe mise (Ruby, Node ou Bun, gems) dans un volume nommé, `<slug>_mise-data` : une reconstruction du conteneur ne le réinstalle pas. L'état de mise (`MISE_STATE_DIR`) est dans le même volume : il note les installations interrompues, que `mise install` reprend après une reconstruction au lieu de les croire terminées. Pour repartir de zéro, par exemple après une montée de version de Debian dans l'image : `podman volume rm <slug>_mise-data` (ou `docker volume rm`).
+- mise installé dans l'image par la feature `devcontainers-extra/features/mise` (`/usr/local/bin/mise`). Il installe ce que le projet déclare : Ruby (`.ruby-version`), Node (`.node-version`), Bun (`.bun-version`) ou Python (`.python-version`). Avec Bun, le `.bun-version` est à créer soi-même : `bun --version > .bun-version`.
+- Ce qu'installe mise (Ruby, Node, Bun ou Python, gems, uv) dans un volume nommé, `<slug>_mise-data` : une reconstruction du conteneur ne le réinstalle pas. L'état de mise (`MISE_STATE_DIR`) est dans le même volume : il note les installations interrompues, que `mise install` reprend après une reconstruction au lieu de les croire terminées. Pour repartir de zéro, par exemple après une montée de version de Debian dans l'image : `podman volume rm <slug>_mise-data` (ou `docker volume rm`).
 - Un vrai PID 1 (`init`) : le conteneur s'arrête tout de suite et les processus zombies sont récoltés.
 - Configuration de Claude Code dans le `tmp/` du projet : elle survit à une reconstruction du conteneur.
 - Connexion de `gh` dans un volume nommé commun à tous les projets de la machine, quelle que soit leur stack, `devcontainers-gh` (monté sur `~/.config/gh`) : un seul jeton par machine. GitHub garde au plus 10 jetons de GitHub CLI par compte et révoque au-delà le moins récemment utilisé : avec un jeton par projet, rouvrir un vieux projet finissait en `HTTP 401: Bad credentials`. Hors du workspace, le volume survit aux reconstructions et n'est pas synchronisé entre machines. Pour se déconnecter de tous les conteneurs de la machine : `podman volume rm devcontainers-gh` (ou `docker volume rm`), conteneurs arrêtés. Un `docker compose down -v` sur un projet Rails ou Node le supprime aussi : il suffit de se reconnecter.
 - Projets générés avant le volume `devcontainers-gh` : après `copier update` et une reconstruction, `tmp/gh` ne sert plus et peut être supprimé.
 - Réglages utilisateur de Claude Code (`tmp/claude/settings.json`) : pas d'attribution dans les commits et les PR. `post-create.sh` les fusionne avec les réglages existants.
-- Node toujours disponible pour les hooks de caveman, qui ne font rien sans lui (caveman ne démarre alors qu'avec `/caveman`) : si le projet ne déclare pas de Node (Rails avec importmap, projet Bun, projet Node existant sans `.node-version`), `post-create.sh` lance `mise use -g --pin node@lts`. La dernière LTS, épinglée, sert de version globale de secours, dans le volume de mise. La version du projet reste prioritaire là où il en déclare une.
+- Node toujours disponible pour les hooks de caveman, qui ne font rien sans lui (caveman ne démarre alors qu'avec `/caveman`) : si le projet ne déclare pas de Node (Rails avec importmap, projet Bun ou Python, projet Node existant sans `.node-version`), `post-create.sh` lance `mise use -g --pin node@lts`. La dernière LTS, épinglée, sert de version globale de secours, dans le volume de mise. La version du projet reste prioritaire là où il en déclare une.
 - rtk (feature `jsburckhardt/devcontainer-features/rtk`) branché sur Claude Code : `post-create.sh` lance `RTK_TELEMETRY_DISABLED=1 rtk init -g --auto-patch`, qui ajoute son hook dans `tmp/claude/settings.json` sans rien demander. Télémétrie jamais acceptée, donc désactivée.
-- À la création du conteneur (`post-create.sh`), dans l'ordre : dotfiles chezmoi, `gh auth login` si la machine n'a pas encore de jeton valide, proposition d'un fichier de version pour un nouveau projet, `mise install`, Node de secours si le projet n'en déclare pas, la gem `ruby-lsp` pour Rails, réglages de Claude Code, `rtk init`, plugins Claude Code (marketplace `codecloud-sh/claude-plugins` et caveman), Playwright pour Astro, puis installation du projet (et Chromium pour Node, avec la version de Playwright du projet).
+- À la création du conteneur (`post-create.sh` ; pour Python, la proposition du fichier de version, `mise install` et l'installation du projet passent avant, dans `on-create.sh`), dans l'ordre : dotfiles chezmoi, `gh auth login` si la machine n'a pas encore de jeton valide, proposition d'un fichier de version pour un nouveau projet, `mise install`, Node de secours si le projet n'en déclare pas, la gem `ruby-lsp` pour Rails, réglages de Claude Code, `rtk init`, plugins Claude Code (marketplace `codecloud-sh/claude-plugins` et caveman), Playwright pour Astro, puis installation du projet (et Chromium pour Node, avec la version de Playwright du projet).
 
 ## Ruby on Rails
 
@@ -97,6 +97,24 @@ Le squelette commun des projets Node, quel que soit leur framework : ce qui est 
 - Port redirigé : 3000.
 - Extensions VS Code : ESLint, Prettier (formatage à l'enregistrement), GitLens, etc.
 
+## Python
+
+Le squelette commun des projets Python, quel que soit leur framework (Django, FastAPI…) : comme pour Node, ce qui est propre à un projet (variables d'environnement, extensions VS Code, ports) s'ajoute dans le projet.
+
+- Un seul conteneur, sans compose.
+- Python et uv installés par mise : Python dans la version de `.python-version`, uv dans sa dernière version (déclaré dans la config système de mise, `/etc/mise/config.toml`, car `~/.config/mise/config.toml` appartient aux dotfiles). Les deux sont dans le volume de mise.
+- `MISE_IDIOMATIC_VERSION_FILE_ENABLE_TOOLS=python,node` : la variable l'emporte sur le réglage des dotfiles, qui omet python. `.node-version` reste lu pour un projet qui a aussi un front.
+- uv n'utilise que le Python de mise (`UV_PYTHON_DOWNLOADS=never`) : jamais un second Python téléchargé hors du volume. `UV_LINK_MODE=copy` : le cache de uv et le `.venv` du projet sont sur deux systèmes de fichiers.
+- Python et les dépendances sont installés par `on-create.sh` (`onCreateCommand`), avant que VS Code se connecte : sinon l'extension Python ne trouve pas d'interpréteur, ou un `.venv` qui pointe vers un Python pas encore installé, et propose d'en installer un. `post-create.sh` fait le reste, comme pour les autres stacks.
+- Nouveau projet (ni `.python-version` ni `pyproject.toml`) : `.python-version` proposé avec la dernière version stable de Python. Un projet existant sans `.python-version` utilise le Python global de mise, dans sa dernière version stable : `uv python pin <version>` fixe celle du projet.
+- Python aussi déclaré en global (`~/.config/mise/conf.d/python.toml`), dans la version du projet : au démarrage, l'extension Python Environments cherche un Python global et propose d'en installer un si elle n'en trouve pas.
+- Installation du projet : `uv sync` s'il y a un `pyproject.toml`. Le `.venv`, dans le dossier du projet, pointe vers le Python du volume de mise : il survit à une reconstruction du conteneur.
+- `make` dans l'image, pour les projets qui passent par un `Makefile`.
+- Plugin Claude Code `codecloud-core`, mis à jour à chaque démarrage et en arrière-plan pendant les sessions.
+- `tmp/.gitignore` créé s'il manque, comme pour Astro.
+- Port redirigé : 8000 (serveur de dev de Django, FastAPI…).
+- Extensions VS Code : Python (avec Pylance et le débogueur), Ruff (formatage à l'enregistrement), GitLens, etc. L'interpréteur par défaut est celui du `.venv`.
+
 ## Pré-requis côté hôte
 
 - `GIT_EMAIL` défini dans l'environnement de l'hôte : il est passé au conteneur (`${localEnv:GIT_EMAIL}`) et lu par les dotfiles. Sinon, chezmoi demande l'email à la création du conteneur.
@@ -105,7 +123,7 @@ Le squelette commun des projets Node, quel que soit leur framework : ce qui est 
 
 ## Faire évoluer le template
 
-Les fichiers de chaque stack sont dans son dossier (`rails/`, `astro/`, `node/`), les questions dans `copier.yml`. Les questions propres à une stack ont une condition `when` sur `stack` : `database`, `redis` et `system_tests` ne sont posées que pour Rails, `postgres` que pour Node.
+Les fichiers de chaque stack sont dans son dossier (`rails/`, `astro/`, `node/`, `python/`), les questions dans `copier.yml`. Les questions propres à une stack ont une condition `when` sur `stack` : `database`, `redis` et `system_tests` ne sont posées que pour Rails, `postgres` que pour Node.
 
 Pour ajouter une stack : créer son dossier avec un `.devcontainer/` et le fichier `{{ _copier_conf.answers_file }}.jinja`, l'ajouter aux choix de `stack` et conditionner ses questions propres.
 
