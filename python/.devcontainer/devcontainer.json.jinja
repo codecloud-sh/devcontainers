@@ -1,0 +1,86 @@
+// Généré avec codecloud-sh/devcontainers (Copier). Pour le mettre à jour :
+//   uvx copier update -a .devcontainer/.copier-answers.yml
+// Format : https://containers.dev/implementors/json_reference/
+{
+  "name": "{{ project_name }}",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "runArgs": ["--hostname={{ project_slug }}"],
+  // PID 1 qui transmet les signaux (arrêt immédiat) et récolte les processus zombies
+  "init": true,
+  "mounts": [
+    // Python, uv et Node installés par mise : gardés d'une reconstruction à l'autre
+    {
+      "source": "{{ project_slug }}_mise-data",
+      "target": "/home/{{ username }}/.local/share/mise",
+      "type": "volume"
+    },
+    // Connexion de gh : un seul jeton par machine, partagé par tous les projets, quelle que soit leur stack
+    {
+      "source": "devcontainers-gh",
+      "target": "/home/{{ username }}/.config/gh",
+      "type": "volume"
+    }
+  ],
+  // Features : https://containers.dev/features
+  "features": {
+    // Dernière version de gh (option "version" à "latest" par défaut) : nécessaire pour `gh pr create --attach`
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers-extra/features/mise:1": {},
+    "ghcr.io/jsburckhardt/devcontainer-features/rtk:1": {}
+  },
+  "containerEnv": {
+    // Python lu dans .python-version (et Node dans .node-version, pour un front). Variable
+    // d'environnement : elle l'emporte sur le réglage des dotfiles, qui omet python
+    "MISE_IDIOMATIC_VERSION_FILE_ENABLE_TOOLS": "python,node",
+    // État de mise dans le volume de ses installations : sinon perdu à la reconstruction,
+    // et une installation interrompue passe pour terminée
+    "MISE_STATE_DIR": "/home/{{ username }}/.local/share/mise/state",
+    // uv utilise toujours le Python de mise : jamais un Python à lui, téléchargé hors du volume
+    "UV_PYTHON_DOWNLOADS": "never",
+    // Cache de uv et .venv du projet sur deux systèmes de fichiers : copie directe des
+    // paquets, sans l'avertissement de uv sur les liens impossibles
+    "UV_LINK_MODE": "copy",
+    "VISUAL": "code --wait",
+    "CLAUDE_CONFIG_DIR": "${containerWorkspaceFolder}/tmp/claude",
+    "GIT_EMAIL": "${localEnv:GIT_EMAIL}",
+    "CAVEMAN_DEFAULT_MODE": "full"
+  },
+  // Ports du conteneur accessibles en local
+  "forwardPorts": [
+    8000 // Serveur de dev de l'application (Django, FastAPI…)
+  ],
+  "portsAttributes": {
+    "8000": {
+      "label": "Application",
+      "onAutoForward": "notify"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "charliermarsh.ruff",
+        "eamodio.gitlens",
+        "github.vscode-pull-request-github",
+        "Anthropic.claude-code",
+        "oderwat.indent-rainbow"
+      ],
+      "settings": {
+        // Le .venv créé par uv sync (on-create.sh)
+        "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python",
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.formatOnSave": true
+        }
+      }
+    }
+  },
+  // Avant la connexion de VS Code : Python et dépendances du projet, pour que
+  // l'extension Python trouve tout de suite le .venv
+  "onCreateCommand": ".devcontainer/on-create.sh",
+  "postCreateCommand": ".devcontainer/post-create.sh",
+  // À chaque démarrage : met à jour les plugins Claude Code du marketplace codecloud
+  "postStartCommand": ".devcontainer/post-start.sh"
+}

@@ -1,5 +1,5 @@
 # Template Copier pour générer le dossier .devcontainer d'un projet.
-# Chaque stack a son dossier (rails/, astro/, node/), choisi par la question `stack`.
+# Chaque stack a son dossier (rails/, astro/, node/, python/), choisi par la question `stack`.
 # Pour en ajouter une : créer son dossier, l'ajouter aux choix de `stack`
 # et conditionner ses questions propres avec `when`.
 
@@ -19,6 +19,7 @@ stack:
     Ruby on Rails: rails
     Astro: astro
     Node: node
+    Python: python
   default: rails
 
 project_name:
